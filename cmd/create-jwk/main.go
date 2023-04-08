@@ -1,8 +1,13 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"log"
+
 	//jose "gopkg.in/square/go-jose.v2"
+
+	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
 func main() {
@@ -36,7 +41,16 @@ func main() {
 
 	// log.Println(jwkJson)
 
-	rsa := jwk.newRSAPublicKey()
+	var rawKey interface{}
+	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		log.Fatalf(`failed to generate rsa private key: %w`, err)
+	}
+	rawKey = rsaKey
 
-	log.Println(rsa)
+	key, err := jwk.FromRaw(rawKey)
+
+	if err != nil {
+		log.Fatalf(`failed to create new JWK from raw key: %w`, err)
+	}
 }

@@ -1,0 +1,40 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Develop only - Dev tag
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Install dependencies
+        run: go get -v ./...  
+
+      - name: Test
+        run: go test -v ./cmd/gst            
+
+      - name: Build Windows AMD64
+        run: env GOOS=windows GOARCH=amd64 go build -o build/gst_windows_amd64.exe -v ./cmd/gst
+
+      - name: Linux AMD64
+        run: env GOOS=linux GOARCH=amd64 go build -o build/gst_linux_amd64.exe -v ./cmd/gst
+        
+      - name: Linux ARM64
+        run: env GOOS=linux GOARCH=arm64 go build -o build/gst_linux_arm64.exe -v ./cmd/gst
+        
+      - name: Linux ARM
+        run: env GOOS=linux GOARCH=arm go build -o build/gst_linux_arm.exe -v ./cmd/gst                 

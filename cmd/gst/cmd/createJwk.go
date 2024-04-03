@@ -18,7 +18,7 @@ func init() {
 	viper.BindPFlag(OutputRsaKeysFlagName, createJwkCmd.Flags().Lookup(OutputRsaKeysFlagName))
 	viper.BindEnv(OutputRsaKeysFlagName)
 
-	rootCmd.AddCommand(createJwkCmd)
+	RootCmd.AddCommand(createJwkCmd)
 }
 
 var createJwkCmd = &cobra.Command{

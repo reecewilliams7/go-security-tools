@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(createClientCredentialsCmd)
+	RootCmd.AddCommand(createClientCredentialsCmd)
 }
 
 var createClientCredentialsCmd = &cobra.Command{

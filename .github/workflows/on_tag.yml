@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Zip
-        run: apt install zip -y
+      # - name: Set up Zip
+      #   run: apt install zip -y
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -32,7 +32,7 @@ jobs:
         run: env GOOS=windows GOARCH=amd64 go build -o build/windows_amd64/gst.exe -v ./cmd/gst
 
       - name: Zip Windows AMD64
-        run: zip gst_windows_amd64.zip build/windows_amd64/gst.exe
+        run: zip build/gst_windows_amd64.zip build/windows_amd64/gst.exe
 
       # - name: Linux AMD64
       #   run: env GOOS=linux GOARCH=amd64 go build -o build/gst_linux_amd64 -v ./cmd/gst

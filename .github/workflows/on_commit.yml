@@ -1,7 +1,7 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Develop only - Dev tag
+name: On Commit
 
 on:
   workflow_dispatch:
@@ -27,14 +27,5 @@ jobs:
       - name: Test
         run: go test -v ./cmd/gst            
 
-      - name: Build Windows AMD64
-        run: env GOOS=windows GOARCH=amd64 go build -o build/gst_windows_amd64.exe -v ./cmd/gst
-
-      - name: Linux AMD64
-        run: env GOOS=linux GOARCH=amd64 go build -o build/gst_linux_amd64.exe -v ./cmd/gst
-        
-      - name: Linux ARM64
-        run: env GOOS=linux GOARCH=arm64 go build -o build/gst_linux_arm64.exe -v ./cmd/gst
-        
-      - name: Linux ARM
-        run: env GOOS=linux GOARCH=arm go build -o build/gst_linux_arm.exe -v ./cmd/gst                 
+      - name: Build
+        run: go build -v ./cmd/gst               

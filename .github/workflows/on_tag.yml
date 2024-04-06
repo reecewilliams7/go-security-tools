@@ -31,19 +31,31 @@ jobs:
       - name: Build Windows AMD64
         run: env GOOS=windows GOARCH=amd64 go build -o build/windows_amd64/gst.exe -v ./cmd/gst
 
-      - name: Zip Windows AMD64
-        run: zip build/gst_windows_amd64.zip build/windows_amd64/gst.exe
+      - name: Linux AMD64
+        run: env GOOS=linux GOARCH=amd64 go build -o build/linux_amd64/gst -v ./cmd/gst
+        
+      - name: Linux ARM64
+        run: env GOOS=linux GOARCH=arm64 go build -o build/linux_arm64/gst -v ./cmd/gst
 
-      # - name: Linux AMD64
-      #   run: env GOOS=linux GOARCH=amd64 go build -o build/gst_linux_amd64 -v ./cmd/gst
-        
-      # - name: Linux ARM64
-      #   run: env GOOS=linux GOARCH=arm64 go build -o build/gst_linux_arm64 -v ./cmd/gst
-        
-      # - name: Linux ARM
-      #   run: env GOOS=linux GOARCH=arm go build -o build/gst_linux_arm -v ./cmd/gst                 
+      - name: Linux ARM
+        run: env GOOS=linux GOARCH=arm go build -o build/linux_arm/gst -v ./cmd/gst   
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows_amd64
-          path: build/*.zip
+          name: gst_windows_amd64
+          path: build/windows_amd64/gst.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gst_linux_amd64
+          path: build/linux_amd64/gst 
+          
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gst_linux_arm64
+          path: build/linux_arm64/gst   
+          
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gst_linux_arm
+          path: build/linux_arm/gst             

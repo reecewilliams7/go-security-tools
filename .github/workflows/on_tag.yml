@@ -42,3 +42,8 @@ jobs:
         
       # - name: Linux ARM
       #   run: env GOOS=linux GOARCH=arm go build -o build/gst_linux_arm -v ./cmd/gst                 
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows_amd64
+          path: build/*.zip

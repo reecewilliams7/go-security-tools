@@ -31,7 +31,7 @@ jobs:
         run: go test -v ./cmd/gst            
 
       - name: Build Windows AMD64
-        run: env GOOS=windows GOARCH=amd64 go build -o build/gst-win-x64 -v ./cmd/gst
+        run: env GOOS=windows GOARCH=amd64 go build -o build/gst-win-x64.exe -v ./cmd/gst
 
       - name: Linux AMD64
         run: env GOOS=linux GOARCH=amd64 go build -o build/gst-linux-x64 -v ./cmd/gst

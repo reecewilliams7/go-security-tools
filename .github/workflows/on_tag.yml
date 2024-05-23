@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write    
     steps:
       - uses: actions/checkout@v3
 
@@ -58,4 +60,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: gst_linux_arm
-          path: build/linux_arm/gst             
+          path: build/linux_arm/gst
+          
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/**/*.*"      

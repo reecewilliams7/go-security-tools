@@ -9,29 +9,64 @@ import (
 )
 
 type jsonWebKeyOutput struct {
-	JsonWebKey       *jwk.Key
-	JsonWebKeyString string
-	Base64JsonWebKey string
-	RsaPublicKey     string
-	RsaPrivateKey    string
+	JsonWebKey             jwk.Key
+	JsonWebKeyString       string
+	JsonWebKeyPublicString string
+	Base64JsonWebKey       string
+	RsaPublicKey           string
+	RsaPrivateKey          string
 }
 
-func NewJsonWebKeyOutput(jsonWebKey *jwk.Key, rsaPrivateKey string, rsaPublicKey string) (*jsonWebKeyOutput, error) {
-	j := &jsonWebKeyOutput{JsonWebKey: jsonWebKey, RsaPrivateKey: rsaPrivateKey, RsaPublicKey: rsaPublicKey}
+func NewJsonWebKeyOutput(
+	jsonWebKey jwk.Key,
+	rsaPrivateKey string,
+	rsaPublicKey string) (*jsonWebKeyOutput, error) {
+	j := &jsonWebKeyOutput{
+		JsonWebKey:    jsonWebKey,
+		RsaPrivateKey: rsaPrivateKey,
+		RsaPublicKey:  rsaPublicKey,
+	}
 
 	jsonbuf, err := json.Marshal(jsonWebKey)
 	if err != nil {
 		return nil, err
 	}
 
-	jwkJson := &bytes.Buffer{}
-	if err := json.Indent(jwkJson, jsonbuf, "", "  "); err != nil {
+	jwkPrivateJson := &bytes.Buffer{}
+	if err := json.Indent(jwkPrivateJson, jsonbuf, "", "  "); err != nil {
 		return nil, err
 	}
 
-	j.JsonWebKeyString = jwkJson.String()
+	j.JsonWebKeyString, err = getJsonOutputFromKey(j.JsonWebKey)
+	if err != nil {
+		return nil, err
+	}
+
+	publicKey, err := j.JsonWebKey.PublicKey()
+	if err != nil {
+		return nil, err
+	}
+
+	j.JsonWebKeyPublicString, err = getJsonOutputFromKey(publicKey)
+	if err != nil {
+		return nil, err
+	}
 
 	j.Base64JsonWebKey = base64.StdEncoding.EncodeToString(jsonbuf)
 
 	return j, nil
+}
+
+func getJsonOutputFromKey(key jwk.Key) (string, error) {
+	jsonbuf, err := json.Marshal(key)
+	if err != nil {
+		return "", err
+	}
+
+	jwkPrivateJson := &bytes.Buffer{}
+	if err := json.Indent(jwkPrivateJson, jsonbuf, "", "  "); err != nil {
+		return "", err
+	}
+
+	return jwkPrivateJson.String(), nil
 }

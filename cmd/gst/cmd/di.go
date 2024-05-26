@@ -20,7 +20,7 @@ func buildLogger(prefix string) hclog.Logger {
 	logger := hclog.New(&hclog.LoggerOptions{
 		Level:      logLevel,
 		TimeFormat: "2006/01/02 15:04:05",
-		Name:       "okta-sync",
+		Name:       "gst",
 		Output:     writer,
 	})
 

@@ -43,7 +43,7 @@ func (*jsonWebKeyCreator) Create() (*jsonWebKeyOutput, error) {
 		return nil, err
 	}
 
-	jo, err := NewJsonWebKeyOutput(&key, string(pemPrivateKey), string(pemPublicKey))
+	jo, err := NewJsonWebKeyOutput(key, string(pemPrivateKey), string(pemPublicKey))
 	if err != nil {
 		return nil, err
 	}

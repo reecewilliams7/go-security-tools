@@ -1,0 +1,1 @@
+go run ./cmd/create-docs/main.go

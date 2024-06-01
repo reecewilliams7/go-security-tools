@@ -11,9 +11,7 @@ import (
 func buildLogger(prefix string) hclog.Logger {
 	configLogLevel := viper.GetString(LogLevelFlagName)
 
-	var writer io.Writer
-
-	writer = os.Stderr
+	var writer io.Writer = os.Stderr
 
 	logLevel := hclog.LevelFromString(configLogLevel)
 

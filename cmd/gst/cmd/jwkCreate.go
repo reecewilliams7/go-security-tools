@@ -27,20 +27,20 @@ func init() {
 	viper.BindPFlag(OutputFileNameFlagName, createJwkCmd.Flags().Lookup(OutputFileNameFlagName))
 	viper.BindEnv(OutputFileNameFlagName)
 
-	RootCmd.AddCommand(createJwkCmd)
+	jwkCmd.AddCommand(createJwkCmd)
 }
 
 var createJwkCmd = &cobra.Command{
-	Use:   "create-jwk",
-	Short: "Creates a JsonWebKey",
-	Long:  "TODO",
+	Use:   "create",
+	Short: "Creates a JSON Web Key",
+	Long:  "Creates a JSON Web Key using an RSA Private Key",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		outputBase64 := viper.GetBool(OutputBase64FlagName)
 		outputRsaKeys := viper.GetBool(OutputRsaKeysFlagName)
 		outputPath := viper.GetString(OutputPathFlagName)
 		outputFile := viper.GetString(OutputFileNameFlagName)
 
-		logger := buildLogger("create-jwk")
+		logger := buildLogger("jwk create")
 
 		var writeToFile = false
 
@@ -52,7 +52,7 @@ var createJwkCmd = &cobra.Command{
 			writeToFile = true
 		}
 
-		jwkc := jwks.NewJsonWebKeyCreator()
+		jwkc := jwks.NewRsaJsonWebKeyCreator()
 		o, err := jwkc.Create()
 		logger.Info("New JWK created successfully. Will now write to output.")
 		if err != nil {

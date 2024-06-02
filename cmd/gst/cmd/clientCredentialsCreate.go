@@ -9,12 +9,12 @@ import (
 )
 
 func init() {
-	RootCmd.AddCommand(createClientCredentialsCmd)
+	clientCredentialsCmd.AddCommand(createClientCredentialsCmd)
 }
 
 var createClientCredentialsCmd = &cobra.Command{
-	Use:   "create-client-credentials",
-	Short: "Creates a Client ID and Secret",
+	Use:   "create",
+	Short: "Creates a Client ID and Secret that can be used as Client Credentials in OAuth2.0 and OpenID Connect",
 	Long:  "TODO",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientIdCreator := ccs.NewGuidClientIdCreator()

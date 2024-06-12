@@ -1,8 +1,8 @@
 package clientCredentials
 
 type clientCredentialsOutput struct {
-	ClientId     string
-	ClientSecret string
+	ClientId     string `json:"client_id,omitempty"`
+	ClientSecret string `json:"client_secret,omitempty"`
 }
 
 func NewClientCredentialsOutput(clientId string, clientSecret string) *clientCredentialsOutput {

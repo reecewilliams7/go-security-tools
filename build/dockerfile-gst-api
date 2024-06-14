@@ -1,0 +1,17 @@
+FROM golang:1.22.4
+
+WORKDIR /app
+EXPOSE 4000
+
+COPY ./go.mod ./
+COPY ./go.sum ./
+
+RUN go mod download
+
+COPY ./cmd/gst-api/*.go ./cmd/gst-api/
+COPY ./internal ./internal
+
+WORKDIR /app/cmd/gst-api
+RUN go build -o /gst-api
+
+ENTRYPOINT [ "/gst-api" ]

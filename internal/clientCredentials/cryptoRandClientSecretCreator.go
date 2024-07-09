@@ -5,15 +5,25 @@ import (
 	rand "math/rand"
 )
 
-type CryptoRandClientSecretCreator struct{}
+type CryptoRandClientSecretCreator struct {
+	src rand.Source
+}
 
 func NewCryptoRandClientSecretCreator() *CryptoRandClientSecretCreator {
-	return &CryptoRandClientSecretCreator{}
+	cryptoSrc := &cryptoSource{}
+	return &CryptoRandClientSecretCreator{
+		src: cryptoSrc,
+	}
+}
+
+func NewCryptoRandClientSecretCreatorWithSource(src rand.Source) *CryptoRandClientSecretCreator {
+	return &CryptoRandClientSecretCreator{
+		src: src,
+	}
 }
 
 func (c *CryptoRandClientSecretCreator) Create() (string, error) {
-	var src cryptoSource
-	rnd := rand.New(src)
+	rnd := rand.New(c.src)
 	buff := make([]byte, 32)
 	_, err := rnd.Read(buff)
 	if err != nil {

@@ -14,7 +14,7 @@ func NewRsaJsonWebKeyCreator() *RsaJsonWebKeyCreator {
 	return &c
 }
 
-func (*RsaJsonWebKeyCreator) Create() (*jsonWebKeyOutput, error) {
+func (*RsaJsonWebKeyCreator) Create() (*JsonWebKeyOutput, error) {
 	var rawKey interface{}
 	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -27,6 +27,8 @@ func (*RsaJsonWebKeyCreator) Create() (*jsonWebKeyOutput, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	jwk.AssignKeyID(key)
 
 	pemPrivateKey, err := jwk.EncodePEM(key)
 	if err != nil {

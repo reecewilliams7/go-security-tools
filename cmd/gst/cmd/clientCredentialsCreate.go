@@ -19,16 +19,21 @@ var createClientCredentialsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientIdCreator := ccs.NewGuidClientIdCreator()
 		clientSecretCreator := ccs.NewCryptoRandClientSecretCreator()
-		cc := ccs.NewClientCredentialsCreator(clientIdCreator, clientSecretCreator)
-		o, err := cc.Create()
+
+		ci, err := clientIdCreator.Create()
+		if err != nil {
+			return err
+		}
+
+		cs, err := clientSecretCreator.Create()
 		if err != nil {
 			return err
 		}
 
 		fmt.Println("Client Id:")
-		fmt.Printf("%s\n", o.ClientId)
+		fmt.Printf("%s\n", ci)
 		fmt.Println("Client Secret:")
-		fmt.Printf("%s\n", o.ClientSecret)
+		fmt.Printf("%s\n", cs)
 
 		return nil
 	},

@@ -1,12 +1,20 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 )
 
 func main() {
+	portPtr := flag.Int("port", 4000, "The port to use")
+
+	flag.Parse()
+
+	port := *portPtr
+
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
@@ -16,7 +24,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:     ":4000",
+		Addr:     fmt.Sprintf(":%d", port),
 		ErrorLog: errorLog,
 		Handler:  app.routes(),
 	}

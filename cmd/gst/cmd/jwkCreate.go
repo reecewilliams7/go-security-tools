@@ -10,6 +10,10 @@ import (
 	jwks "github.com/reecewilliams7/go-security-tools/internal/jsonWebKeys"
 )
 
+type JsonWebKeyCreator interface {
+	Create() (*jwks.JsonWebKeyOutput, error)
+}
+
 func init() {
 	createJwkCmd.Flags().BoolP(OutputBase64FlagName, "b", false, "Whether to output the JWK as a Base64 string.")
 	viper.BindPFlag(OutputBase64FlagName, createJwkCmd.Flags().Lookup(OutputBase64FlagName))

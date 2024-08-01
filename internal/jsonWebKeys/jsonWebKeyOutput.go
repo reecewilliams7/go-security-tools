@@ -8,7 +8,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
-type jsonWebKeyOutput struct {
+type JsonWebKeyOutput struct {
 	JsonWebKey             jwk.Key `json:"jwk,omitempty"`
 	JsonWebKeyPublic       jwk.Key `json:"jwk_public_key,omitempty"`
 	JsonWebKeyString       string  `json:"jwk_string,omitempty"`
@@ -21,8 +21,8 @@ type jsonWebKeyOutput struct {
 func NewJsonWebKeyOutput(
 	jsonWebKey jwk.Key,
 	rsaPrivateKey string,
-	rsaPublicKey string) (*jsonWebKeyOutput, error) {
-	j := &jsonWebKeyOutput{
+	rsaPublicKey string) (*JsonWebKeyOutput, error) {
+	j := &JsonWebKeyOutput{
 		JsonWebKey:    jsonWebKey,
 		RsaPrivateKey: rsaPrivateKey,
 		RsaPublicKey:  rsaPublicKey,

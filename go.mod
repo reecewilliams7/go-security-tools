@@ -7,7 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/lestrrat-go/jwx/v2 v2.1.2
+	github.com/lestrrat-go/jwx/v2 v2.1.3
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )

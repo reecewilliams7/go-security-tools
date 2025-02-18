@@ -1,64 +1,33 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: On Tag
+name: On Tag (releaser)
 
 on:
   workflow_dispatch:
   push:
     tags: [ "*" ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write    
-    steps:
-      - uses: actions/checkout@v3
+permissions:
+  contents: write
 
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
-
-      - name: Install dependencies
-        run: go get -v ./...  
-
-      - name: Test
-        run: go test -v ./cmd/gst            
-
-      - name: Build Windows AMD64
-        run: env GOOS=windows GOARCH=amd64 go build -o build/gst-win-x64.exe -v ./cmd/gst
-
-      - name: Linux AMD64
-        run: env GOOS=linux GOARCH=amd64 go build -o build/gst-linux-x64 -v ./cmd/gst
-        
-      - name: Linux ARM64
-        run: env GOOS=linux GOARCH=arm64 go build -o build/gst-linux-arm64 -v ./cmd/gst
-
-      - name: Linux ARM
-        run: env GOOS=linux GOARCH=arm go build -o build/gst-linux-arm -v ./cmd/gst   
-
-      - uses: actions/upload-artifact@v4
+          go-version: '1.23'
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
-          name: gst_windows_amd64
-          path: build/gst-win-x64.exe
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          # 'latest', 'nightly', or a semver
+          version: '~> v2'
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: gst_linux_amd64
-          path: build/gst-linux-x64
-          
-      - uses: actions/upload-artifact@v4
-        with:
-          name: gst_linux_arm64
-          path: build/gst-linux-arm64   
-          
-      - uses: actions/upload-artifact@v4
-        with:
-          name: gst_linux_arm
-          path: build/gst-linux-arm
-          
-      - uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/gst*"      

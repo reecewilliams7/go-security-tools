@@ -12,9 +12,6 @@ var (
 		Use:   "gst",
 		Short: "A CLI tool containing various security related functions",
 		Long:  "TODO",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
 	}
 )
 
@@ -23,13 +20,12 @@ func Execute() error {
 }
 
 func init() {
+	viper.SetEnvPrefix("GST")
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
 
 	RootCmd.PersistentFlags().StringP(LogLevelFlagName, "l", "Info", "The logging level to use - 'Info', 'Debug', 'Warn', 'Error'")
 
 	viper.BindPFlag(LogLevelFlagName, RootCmd.PersistentFlags().Lookup(LogLevelFlagName))
-
-	viper.SetEnvPrefix("GST")
 	viper.BindEnv(LogLevelFlagName)
 }

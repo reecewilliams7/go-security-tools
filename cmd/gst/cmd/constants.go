@@ -7,5 +7,6 @@ const (
 	OutputRsaKeysFlagName  = "output-rsa-keys"
 	OutputPathFlagName     = "output-path"
 	OutputFileNameFlagName = "output-file-name"
+	CountFlagName          = "count"
 	OutputFileDefaultName  = "create-jwk"
 )

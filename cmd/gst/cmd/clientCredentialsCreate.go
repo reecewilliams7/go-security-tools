@@ -7,11 +7,14 @@ import (
 	"github.com/spf13/viper"
 
 	ccs "github.com/reecewilliams7/go-security-tools/internal/clientCredentials"
+
+	ccspkg "github.com/reecewilliams7/go-security-tools/pkg/clientCredentials"
 )
 
 func init() {
 	createClientCredentialsCmd.Flags().IntP(CountFlagName, "c", 1, "The count to create.")
-
+	createClientCredentialsCmd.Flags().StringP(ClientIdTypeFlag, "t", ClientIdTypeUUIDv7, "The type of Client ID to create. Options are 'uuidv7' and 'short'.")
+	createClientCredentialsCmd.Flags().StringP(ClientSecretTypeFlag, "s", ClientSecretTypeCryptoRand, "The type of Client Secret to create. Options are 'crypto-rand'.")
 	clientCredentialsCmd.AddCommand(createClientCredentialsCmd)
 }
 
@@ -26,7 +29,7 @@ var createClientCredentialsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		count := viper.GetInt(CountFlagName)
 
-		clientIdCreator := ccs.NewGuidClientIdCreator()
+		clientIdCreator := ccspkg.NewUUIDv7ClientIdCreator() // ccs.NewGuidClientIdCreator()
 		clientSecretCreator := ccs.NewCryptoRandClientSecretCreator()
 
 		for range count {

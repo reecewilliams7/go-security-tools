@@ -9,4 +9,15 @@ const (
 	OutputFileNameFlagName = "output-file-name"
 	CountFlagName          = "count"
 	OutputFileDefaultName  = "create-jwk"
+
+	// Client Credentials
+	ClientIdTypeFlag     = "client-id-type"
+	ClientSecretTypeFlag = "client-secret-type"
+
+	// Client ID Types
+	ClientIdTypeUUIDv7 = "uuidv7"
+	ClientIdTypeShort  = "short"
+
+	// Client Secret Types
+	ClientSecretTypeCryptoRand = "crypto-rand"
 )

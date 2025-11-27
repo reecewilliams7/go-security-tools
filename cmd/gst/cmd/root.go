@@ -24,8 +24,8 @@ func init() {
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
 
-	RootCmd.PersistentFlags().StringP(LogLevelFlagName, "l", "Info", "The logging level to use - 'Info', 'Debug', 'Warn', 'Error'")
+	RootCmd.PersistentFlags().StringP(LogLevelFlag, "l", "Info", "The logging level to use - 'Info', 'Debug', 'Warn', 'Error'")
 
-	viper.BindPFlag(LogLevelFlagName, RootCmd.PersistentFlags().Lookup(LogLevelFlagName))
-	viper.BindEnv(LogLevelFlagName)
+	viper.BindPFlag(LogLevelFlag, RootCmd.PersistentFlags().Lookup(LogLevelFlag))
+	viper.BindEnv(LogLevelFlag)
 }

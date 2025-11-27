@@ -9,7 +9,7 @@ import (
 
 func init() {
 	createClientCredentialsCmd.Flags().IntP(CountFlag, "c", 1, "The count to create.")
-	createClientCredentialsCmd.Flags().StringP(ClientIdTypeFlag, "t", ClientIdTypeUUIDv7, "The type of Client ID to create. Options are 'uuidv7' and 'short'.")
+	createClientCredentialsCmd.Flags().StringP(ClientIdTypeFlag, "t", ClientIdTypeUUIDv7, "The type of Client ID to create. Options are 'uuidv7' and 'short-uuid'.")
 	createClientCredentialsCmd.Flags().StringP(ClientSecretTypeFlag, "s", ClientSecretTypeCryptoRand, "The type of Client Secret to create. Options are 'crypto-rand'.")
 	clientCredentialsCmd.AddCommand(createClientCredentialsCmd)
 }

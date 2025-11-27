@@ -18,8 +18,6 @@ func NewECDSAJsonWebKeyCreator(curveType string) *ECDSAJsonWebKeyCreator {
 }
 
 func (c *ECDSAJsonWebKeyCreator) Create() (*JsonWebKeyOutput, error) {
-	var rawKey interface{}
-
 	var curve elliptic.Curve
 	switch c.curveType {
 	case "P256":
@@ -37,9 +35,7 @@ func (c *ECDSAJsonWebKeyCreator) Create() (*JsonWebKeyOutput, error) {
 		return nil, err
 	}
 
-	rawKey = ecdsaKey
-
-	key, err := jwk.FromRaw(rawKey)
+	key, err := jwk.FromRaw(ecdsaKey)
 
 	if err != nil {
 		return nil, err
@@ -52,7 +48,12 @@ func (c *ECDSAJsonWebKeyCreator) Create() (*JsonWebKeyOutput, error) {
 		return nil, err
 	}
 
-	pemPublicKey, err := jwk.EncodePEM(ecdsaKey.Public())
+	publicKey, err := jwk.PublicKeyOf(key)
+	if err != nil {
+		return nil, err
+	}
+
+	pemPublicKey, err := jwk.EncodePEM(publicKey)
 	if err != nil {
 		return nil, err
 	}

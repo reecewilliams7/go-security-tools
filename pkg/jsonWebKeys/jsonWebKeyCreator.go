@@ -1,5 +1,5 @@
 package jsonWebKeys
 
 type JsonWebKeyCreator interface {
-	Create(length int) (*JsonWebKeyOutput, error)
+	Create() (*JsonWebKeyOutput, error)
 }

@@ -33,7 +33,6 @@ func buildLogger(prefix string) hclog.Logger {
 func buildClientCredentialsCreator(clientIdType string, clientSecretType string) (*clientCredentials.ClientCredentialsCreator, error) {
 	var clientIdCreator clientCredentials.ClientIdCreator
 	var clientSecretCreator clientCredentials.ClientSecretCreator
-	var err error
 
 	switch clientIdType {
 	case ClientIdTypeUUIDv7:
@@ -53,7 +52,7 @@ func buildClientCredentialsCreator(clientIdType string, clientSecretType string)
 
 	ccc := clientCredentials.NewClientCredentialsCreator(clientIdCreator, clientSecretCreator)
 
-	return ccc, err
+	return ccc, nil
 }
 
 func buildJwkCreator(jwkAlgorithm string) (JsonWebKeyCreator, error) {

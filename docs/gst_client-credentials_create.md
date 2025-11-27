@@ -13,7 +13,7 @@ gst client-credentials create [flags]
 ### Options
 
 ```
-  -t, --client-id-type string       The type of Client ID to create. Options are 'uuidv7' and 'short'. (default "uuidv7")
+  -t, --client-id-type string       The type of Client ID to create. Options are 'uuidv7' and 'short-uuid'. (default "uuidv7")
   -s, --client-secret-type string   The type of Client Secret to create. Options are 'crypto-rand'. (default "crypto-rand")
   -c, --count int                   The count to create. (default 1)
   -h, --help                        help for create

@@ -6,13 +6,14 @@ import (
 	"os"
 
 	"github.com/reecewilliams7/go-security-tools/pkg/clientCredentials"
+	jwks "github.com/reecewilliams7/go-security-tools/pkg/jsonWebKeys"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/spf13/viper"
 )
 
 func buildLogger(prefix string) hclog.Logger {
-	configLogLevel := viper.GetString(LogLevelFlagName)
+	configLogLevel := viper.GetString(LogLevelFlag)
 
 	var writer io.Writer = os.Stderr
 
@@ -53,4 +54,21 @@ func buildClientCredentialsCreator(clientIdType string, clientSecretType string)
 	ccc := clientCredentials.NewClientCredentialsCreator(clientIdCreator, clientSecretCreator)
 
 	return ccc, err
+}
+
+func buildJwkCreator(jwkAlgorithm string) (JsonWebKeyCreator, error) {
+	switch jwkAlgorithm {
+	case JwkAlgorithmRsa2048:
+		return jwks.NewRsaJsonWebKeyCreator(2048), nil
+	case JwkAlgorithmRsa4096:
+		return jwks.NewRsaJsonWebKeyCreator(4096), nil
+	case JwkAlgorithmEcdsaP256:
+		return jwks.NewECDSAJsonWebKeyCreator("P256"), nil
+	case JwkAlgorithmEcdsaP384:
+		return jwks.NewECDSAJsonWebKeyCreator("P384"), nil
+	case JwkAlgorithmEcdsaP521:
+		return jwks.NewECDSAJsonWebKeyCreator("P521"), nil
+	default:
+		return nil, fmt.Errorf("unknown JWK algorithm: %s", jwkAlgorithm)
+	}
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	jwks "github.com/reecewilliams7/go-security-tools/internal/jsonWebKeys"
+	jwks "github.com/reecewilliams7/go-security-tools/pkg/jsonWebKeys"
 )
 
 type JsonWebKeyCreator interface {
@@ -15,12 +15,12 @@ type JsonWebKeyCreator interface {
 }
 
 func init() {
-	createJwkCmd.Flags().BoolP(OutputBase64FlagName, "b", false, "Whether to output the JWK as a Base64 string.")
-	createJwkCmd.Flags().BoolP(OutputRsaKeysFlagName, "r", false, "Whether to output the JWK RSA private/public key pair as PEM encoded strings.")
-	createJwkCmd.Flags().StringP(OutputPathFlagName, "p", "", "The path to write the JWK output to. Will withhold output from the console when specified.")
-	createJwkCmd.Flags().StringP(OutputFileNameFlagName, "f", OutputFileDefaultName, "The name of the file(s) to write to.")
-	createJwkCmd.Flags().IntP(CountFlagName, "c", 1, "The count to create.")
-
+	createJwkCmd.Flags().BoolP(OutputBase64Flag, "b", false, "Whether to output the JWK as a Base64 string.")
+	createJwkCmd.Flags().BoolP(OutputPemKeysFlag, "p", false, "Whether to output the JWK RSA private/public key pair as PEM encoded strings.")
+	createJwkCmd.Flags().StringP(OutputPathFlag, "o", "", "The path to write the JWK output to. Will withhold output from the console when specified.")
+	createJwkCmd.Flags().StringP(OutputFileNameFlag, "f", OutputFileDefault, "The name of the file(s) to write to.")
+	createJwkCmd.Flags().IntP(CountFlag, "c", 1, "The count to create.")
+	createJwkCmd.Flags().StringP(KeyTypeFlag, "a", JwkAlgorithmRsa2048, "The key type to use. Options are 'RSA-2048', 'RSA-4096', 'ECDSA-P256', 'ECDSA-P384', 'ECDSA-P521'.")
 	jwkCmd.AddCommand(createJwkCmd)
 }
 
@@ -29,19 +29,21 @@ var createJwkCmd = &cobra.Command{
 	Short: "Creates a JSON Web Key",
 	Long:  "Creates a JSON Web Key using an RSA Private Key",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		viper.BindPFlag(OutputBase64FlagName, cmd.Flags().Lookup(OutputBase64FlagName))
-		viper.BindPFlag(OutputPathFlagName, cmd.Flags().Lookup(OutputPathFlagName))
-		viper.BindPFlag(OutputRsaKeysFlagName, cmd.Flags().Lookup(OutputRsaKeysFlagName))
-		viper.BindPFlag(OutputFileNameFlagName, cmd.Flags().Lookup(OutputFileNameFlagName))
-		viper.BindPFlag(CountFlagName, cmd.Flags().Lookup(CountFlagName))
+		viper.BindPFlag(OutputBase64Flag, cmd.Flags().Lookup(OutputBase64Flag))
+		viper.BindPFlag(OutputPathFlag, cmd.Flags().Lookup(OutputPathFlag))
+		viper.BindPFlag(OutputPemKeysFlag, cmd.Flags().Lookup(OutputPemKeysFlag))
+		viper.BindPFlag(OutputFileNameFlag, cmd.Flags().Lookup(OutputFileNameFlag))
+		viper.BindPFlag(CountFlag, cmd.Flags().Lookup(CountFlag))
+		viper.BindPFlag(KeyTypeFlag, cmd.Flags().Lookup(KeyTypeFlag))
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		outputBase64 := viper.GetBool(OutputBase64FlagName)
-		outputRsaKeys := viper.GetBool(OutputRsaKeysFlagName)
-		outputPath := viper.GetString(OutputPathFlagName)
-		outputFile := viper.GetString(OutputFileNameFlagName)
-		count := viper.GetInt(CountFlagName)
+		outputBase64 := viper.GetBool(OutputBase64Flag)
+		outputPemKeys := viper.GetBool(OutputPemKeysFlag)
+		outputPath := viper.GetString(OutputPathFlag)
+		outputFile := viper.GetString(OutputFileNameFlag)
+		count := viper.GetInt(CountFlag)
+		jwkAlgorithm := viper.GetString(KeyTypeFlag)
 
 		logger := buildLogger("jwk create")
 
@@ -55,7 +57,10 @@ var createJwkCmd = &cobra.Command{
 			writeToFile = true
 		}
 
-		jwkc := jwks.NewRsaJsonWebKeyCreator()
+		jwkc, err := buildJwkCreator(jwkAlgorithm)
+		if err != nil {
+			return err
+		}
 
 		for range count {
 			o, err := jwkc.Create()
@@ -78,13 +83,13 @@ var createJwkCmd = &cobra.Command{
 					os.WriteFile(base64FilePath, []byte(o.Base64JsonWebKey), os.ModePerm)
 					logger.Info(fmt.Sprintf("Base64 JWK Private key file written to: %s", base64FilePath))
 				}
-				if outputRsaKeys {
+				if outputPemKeys {
 					rsaPubFilePath := getOutputFilePath(outputPath, outputFile, "pub", count)
-					os.WriteFile(rsaPubFilePath, []byte(o.RsaPublicKey), os.ModePerm)
+					os.WriteFile(rsaPubFilePath, []byte(o.AlgPublicKey), os.ModePerm)
 					logger.Info(fmt.Sprintf("RSA Public key file written to: %s", rsaPubFilePath))
 
 					rsaPrivateFilePath := getOutputFilePath(outputPath, outputFile, "key", count)
-					os.WriteFile(rsaPrivateFilePath, []byte(o.RsaPrivateKey), os.ModePerm)
+					os.WriteFile(rsaPrivateFilePath, []byte(o.AlgPrivateKey), os.ModePerm)
 					logger.Info(fmt.Sprintf("RSA Private key file written to: %s", rsaPrivateFilePath))
 				}
 			} else {
@@ -105,16 +110,16 @@ var createJwkCmd = &cobra.Command{
 					fmt.Println(o.Base64JsonWebKey)
 					fmt.Println("")
 				}
-				if outputRsaKeys {
+				if outputPemKeys {
 					fmt.Println("---------------------------")
 					fmt.Println("")
-					fmt.Println("PEM Encoded RSA Private Key:")
-					fmt.Println(o.RsaPrivateKey)
+					fmt.Printf("PEM Encoded %s Private Key:\n", o.JsonWebKey.KeyType())
+					fmt.Println(o.AlgPrivateKey)
 					fmt.Println("")
 					fmt.Println("---------------------------")
 					fmt.Println("")
-					fmt.Println("PEM Encoded RSA Public Key:")
-					fmt.Println(o.RsaPublicKey)
+					fmt.Printf("PEM Encoded %s Public Key:\n", o.JsonWebKey.KeyType())
+					fmt.Println(o.AlgPublicKey)
 					fmt.Println("")
 				}
 				fmt.Println("**********************************************************")

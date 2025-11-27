@@ -1,8 +1,6 @@
 module github.com/reecewilliams7/go-security-tools
 
-go 1.24.0
-
-toolchain go1.24.5
+go 1.25.4
 
 require (
 	github.com/google/uuid v1.6.0

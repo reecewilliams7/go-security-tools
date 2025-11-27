@@ -1,23 +1,23 @@
 package clientCredentials
 
 type ClientCredentialsCreator struct {
-	ClientIdCreator     ClientIdCreator
-	ClientSecretCreator ClientSecretCreator
+	clientIdCreator     ClientIdCreator
+	clientSecretCreator ClientSecretCreator
 }
 
 func NewClientCredentialsCreator(clientIdCreator ClientIdCreator, clientSecretCreator ClientSecretCreator) *ClientCredentialsCreator {
 	return &ClientCredentialsCreator{
-		ClientIdCreator:     clientIdCreator,
-		ClientSecretCreator: clientSecretCreator,
+		clientIdCreator:     clientIdCreator,
+		clientSecretCreator: clientSecretCreator,
 	}
 }
 
 func (ccc *ClientCredentialsCreator) CreateClientCredentials() (*ClientCredentials, error) {
-	clientId, err := ccc.ClientIdCreator.Create()
+	clientId, err := ccc.clientIdCreator.Create()
 	if err != nil {
 		return nil, err
 	}
-	clientSecret, err := ccc.ClientSecretCreator.Create()
+	clientSecret, err := ccc.clientSecretCreator.Create()
 	if err != nil {
 		return nil, err
 	}

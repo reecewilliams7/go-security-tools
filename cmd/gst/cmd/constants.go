@@ -16,7 +16,7 @@ const (
 
 	// Client ID Types
 	ClientIdTypeUUIDv7 = "uuidv7"
-	ClientIdTypeShort  = "short"
+	ClientIdTypeShort  = "short-uuid"
 
 	// Client Secret Types
 	ClientSecretTypeCryptoRand = "crypto-rand"

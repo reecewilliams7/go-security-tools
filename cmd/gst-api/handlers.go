@@ -6,8 +6,8 @@ import (
 
 	"github.com/reecewilliams7/go-security-tools/cmd/gst-api/models"
 
-	ccs "github.com/reecewilliams7/go-security-tools/internal/clientCredentials"
 	jwks "github.com/reecewilliams7/go-security-tools/internal/jsonWebKeys"
+	ccs "github.com/reecewilliams7/go-security-tools/pkg/clientCredentials"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +40,7 @@ func (app *application) clientCredentials(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	clientIdCreator := ccs.NewGuidClientIdCreator()
+	clientIdCreator := ccs.NewUUIDv7ClientIdCreator()
 	clientSecretCreator := ccs.NewCryptoRandClientSecretCreator()
 
 	ci, err := clientIdCreator.Create()

@@ -5,10 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	ccs "github.com/reecewilliams7/go-security-tools/internal/clientCredentials"
-
-	ccspkg "github.com/reecewilliams7/go-security-tools/pkg/clientCredentials"
 )
 
 func init() {
@@ -24,30 +20,32 @@ var createClientCredentialsCmd = &cobra.Command{
 	Long:  "TODO",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		viper.BindPFlag(CountFlagName, cmd.Flags().Lookup(CountFlagName))
+		viper.BindPFlag(ClientIdTypeFlag, cmd.Flags().Lookup(ClientIdTypeFlag))
+		viper.BindPFlag(ClientSecretTypeFlag, cmd.Flags().Lookup(ClientSecretTypeFlag))
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		count := viper.GetInt(CountFlagName)
+		clientIdType := viper.GetString(ClientIdTypeFlag)
+		clientSecretType := viper.GetString(ClientSecretTypeFlag)
 
-		clientIdCreator := ccspkg.NewUUIDv7ClientIdCreator() // ccs.NewGuidClientIdCreator()
-		clientSecretCreator := ccs.NewCryptoRandClientSecretCreator()
+		ccc, err := buildClientCredentialsCreator(clientIdType, clientSecretType)
+		if err != nil {
+			return err
+		}
 
 		for range count {
 			fmt.Println("**********************************************************")
-			ci, err := clientIdCreator.Create()
-			if err != nil {
-				return err
-			}
 
-			cs, err := clientSecretCreator.Create()
+			cc, err := ccc.CreateClientCredentials()
 			if err != nil {
 				return err
 			}
 
 			fmt.Println("Client Id:")
-			fmt.Printf("%s\n", ci)
+			fmt.Printf("%s\n", cc.ClientID)
 			fmt.Println("Client Secret:")
-			fmt.Printf("%s\n", cs)
+			fmt.Printf("%s\n", cc.ClientSecret)
 			fmt.Println("**********************************************************")
 		}
 

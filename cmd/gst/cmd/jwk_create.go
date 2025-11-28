@@ -7,11 +7,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	jwks "github.com/reecewilliams7/go-security-tools/pkg/jsonWebKeys"
+	"github.com/reecewilliams7/go-security-tools/pkg/jwk"
 )
 
-type JsonWebKeyCreator interface {
-	Create() (*jwks.JsonWebKeyOutput, error)
+// JSONWebKeyCreator is an interface for creating JSON Web Keys.
+type JSONWebKeyCreator interface {
+	Create() (*jwk.JSONWebKeyOutput, error)
 }
 
 func init() {
@@ -28,16 +29,28 @@ var createJwkCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates a JSON Web Key",
 	Long:  "Creates a JSON Web Key using an RSA Private Key",
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		viper.BindPFlag(OutputBase64Flag, cmd.Flags().Lookup(OutputBase64Flag))
-		viper.BindPFlag(OutputPathFlag, cmd.Flags().Lookup(OutputPathFlag))
-		viper.BindPFlag(OutputPemKeysFlag, cmd.Flags().Lookup(OutputPemKeysFlag))
-		viper.BindPFlag(OutputFileNameFlag, cmd.Flags().Lookup(OutputFileNameFlag))
-		viper.BindPFlag(CountFlag, cmd.Flags().Lookup(CountFlag))
-		viper.BindPFlag(KeyTypeFlag, cmd.Flags().Lookup(KeyTypeFlag))
+	PreRunE: func(cmd *cobra.Command, _ []string) error {
+		if err := viper.BindPFlag(OutputBase64Flag, cmd.Flags().Lookup(OutputBase64Flag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(OutputPathFlag, cmd.Flags().Lookup(OutputPathFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(OutputPemKeysFlag, cmd.Flags().Lookup(OutputPemKeysFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(OutputFileNameFlag, cmd.Flags().Lookup(OutputFileNameFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(CountFlag, cmd.Flags().Lookup(CountFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(KeyTypeFlag, cmd.Flags().Lookup(KeyTypeFlag)); err != nil {
+			return err
+		}
 		return nil
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		outputBase64 := viper.GetBool(OutputBase64Flag)
 		outputPemKeys := viper.GetBool(OutputPemKeysFlag)
 		outputPath := viper.GetString(OutputPathFlag)
@@ -47,7 +60,7 @@ var createJwkCmd = &cobra.Command{
 
 		logger := buildLogger("jwk create")
 
-		var writeToFile = false
+		writeToFile := false
 
 		if len(outputPath) > 0 {
 			if _, err := os.Stat(outputPath); os.IsNotExist(err) {
@@ -64,61 +77,71 @@ var createJwkCmd = &cobra.Command{
 
 		for range count {
 			o, err := jwkc.Create()
-			logger.Info("New JWK created successfully. Will now write to output.")
 			if err != nil {
 				return err
 			}
+			logger.Info("New JWK created successfully. Will now write to output.")
 
 			if writeToFile {
 				jwkFilePath := getOutputFilePath(outputPath, outputFile, "jwk", count)
-				os.WriteFile(jwkFilePath, []byte(o.JsonWebKeyString), os.ModePerm)
+				if err := os.WriteFile(jwkFilePath, []byte(o.JSONWebKeyString), 0600); err != nil {
+					return err
+				}
 				logger.Info(fmt.Sprintf("JWK Private key file written to: %s", jwkFilePath))
 
 				jwkPubFilePath := getOutputFilePath(outputPath, fmt.Sprintf("%s-pub", outputFile), "jwk", count)
-				os.WriteFile(jwkPubFilePath, []byte(o.JsonWebKeyPublicString), os.ModePerm)
+				if err := os.WriteFile(jwkPubFilePath, []byte(o.JSONWebKeyPublicString), 0644); err != nil {
+					return err
+				}
 				logger.Info(fmt.Sprintf("JWK Public key file written to: %s", jwkPubFilePath))
 
 				if outputBase64 {
 					base64FilePath := getOutputFilePath(outputPath, fmt.Sprintf("%s-base64", outputFile), "jwk", count)
-					os.WriteFile(base64FilePath, []byte(o.Base64JsonWebKey), os.ModePerm)
+					if err := os.WriteFile(base64FilePath, []byte(o.Base64JSONWebKey), 0600); err != nil {
+						return err
+					}
 					logger.Info(fmt.Sprintf("Base64 JWK Private key file written to: %s", base64FilePath))
 				}
 				if outputPemKeys {
 					rsaPubFilePath := getOutputFilePath(outputPath, outputFile, "pub", count)
-					os.WriteFile(rsaPubFilePath, []byte(o.AlgPublicKey), os.ModePerm)
+					if err := os.WriteFile(rsaPubFilePath, []byte(o.AlgPublicKey), 0644); err != nil {
+						return err
+					}
 					logger.Info(fmt.Sprintf("RSA Public key file written to: %s", rsaPubFilePath))
 
 					rsaPrivateFilePath := getOutputFilePath(outputPath, outputFile, "key", count)
-					os.WriteFile(rsaPrivateFilePath, []byte(o.AlgPrivateKey), os.ModePerm)
+					if err := os.WriteFile(rsaPrivateFilePath, []byte(o.AlgPrivateKey), 0600); err != nil {
+						return err
+					}
 					logger.Info(fmt.Sprintf("RSA Private key file written to: %s", rsaPrivateFilePath))
 				}
 			} else {
 				fmt.Println("**********************************************************")
 				fmt.Println("JWK Private Key:")
-				fmt.Println(o.JsonWebKeyString)
+				fmt.Println(o.JSONWebKeyString)
 				fmt.Println("")
 				fmt.Println("---------------------------")
 				fmt.Println("")
 				fmt.Println("JWK Public Key:")
-				fmt.Println(o.JsonWebKeyPublicString)
+				fmt.Println(o.JSONWebKeyPublicString)
 
 				if outputBase64 {
 					fmt.Println("")
 					fmt.Println("---------------------------")
 					fmt.Println("")
 					fmt.Println("Base64 Encoded JWK Private Key:")
-					fmt.Println(o.Base64JsonWebKey)
+					fmt.Println(o.Base64JSONWebKey)
 					fmt.Println("")
 				}
 				if outputPemKeys {
 					fmt.Println("---------------------------")
 					fmt.Println("")
-					fmt.Printf("PEM Encoded %s Private Key:\n", o.JsonWebKey.KeyType())
+					fmt.Printf("PEM Encoded %s Private Key:\n", o.JSONWebKey.KeyType())
 					fmt.Println(o.AlgPrivateKey)
 					fmt.Println("")
 					fmt.Println("---------------------------")
 					fmt.Println("")
-					fmt.Printf("PEM Encoded %s Public Key:\n", o.JsonWebKey.KeyType())
+					fmt.Printf("PEM Encoded %s Public Key:\n", o.JSONWebKey.KeyType())
 					fmt.Println(o.AlgPublicKey)
 					fmt.Println("")
 				}

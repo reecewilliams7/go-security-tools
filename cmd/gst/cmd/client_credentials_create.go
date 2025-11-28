@@ -17,19 +17,25 @@ func init() {
 var createClientCredentialsCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates a Client ID and Secret that can be used as Client Credentials in OAuth2.0 and OpenID Connect",
-	Long:  "TODO",
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		viper.BindPFlag(CountFlag, cmd.Flags().Lookup(CountFlag))
-		viper.BindPFlag(ClientIdTypeFlag, cmd.Flags().Lookup(ClientIdTypeFlag))
-		viper.BindPFlag(ClientSecretTypeFlag, cmd.Flags().Lookup(ClientSecretTypeFlag))
+	Long:  "Creates a Client ID and Secret pair for use with OAuth2.0 and OpenID Connect flows.",
+	PreRunE: func(cmd *cobra.Command, _ []string) error {
+		if err := viper.BindPFlag(CountFlag, cmd.Flags().Lookup(CountFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(ClientIdTypeFlag, cmd.Flags().Lookup(ClientIdTypeFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(ClientSecretTypeFlag, cmd.Flags().Lookup(ClientSecretTypeFlag)); err != nil {
+			return err
+		}
 		return nil
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		count := viper.GetInt(CountFlag)
-		clientIdType := viper.GetString(ClientIdTypeFlag)
+		clientIDType := viper.GetString(ClientIdTypeFlag)
 		clientSecretType := viper.GetString(ClientSecretTypeFlag)
 
-		ccc, err := buildClientCredentialsCreator(clientIdType, clientSecretType)
+		ccc, err := buildClientCredentialsCreator(clientIDType, clientSecretType)
 		if err != nil {
 			return err
 		}
@@ -42,7 +48,7 @@ var createClientCredentialsCmd = &cobra.Command{
 				return err
 			}
 
-			fmt.Println("Client Id:")
+			fmt.Println("Client ID:")
 			fmt.Printf("%s\n", cc.ClientID)
 			fmt.Println("Client Secret:")
 			fmt.Printf("%s\n", cc.ClientSecret)

@@ -21,7 +21,7 @@ func init() {
 	createJwkCmd.Flags().StringP(OutputPathFlag, "o", "", "The path to write the JWK output to. Will withhold output from the console when specified.")
 	createJwkCmd.Flags().StringP(OutputFileNameFlag, "f", OutputFileDefault, "The name of the file(s) to write to.")
 	createJwkCmd.Flags().IntP(CountFlag, "c", 1, "The count to create.")
-	createJwkCmd.Flags().StringP(KeyTypeFlag, "a", JwkAlgorithmRsa2048, "The key type to use. Options are 'RSA-2048', 'RSA-4096', 'ECDSA-P256', 'ECDSA-P384', 'ECDSA-P521'.")
+	createJwkCmd.Flags().StringP(KeyTypeFlag, "k", JwkAlgorithmRsa2048, "The key type to use. Options are 'RSA-2048', 'RSA-4096', 'ECDSA-P256', 'ECDSA-P384', 'ECDSA-P521'.")
 	jwkCmd.AddCommand(createJwkCmd)
 }
 

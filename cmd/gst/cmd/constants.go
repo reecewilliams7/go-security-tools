@@ -4,12 +4,12 @@ const (
 	LogLevelFlag = "log-level"
 
 	// JWK
-	OutputBase64Flag   = "output-base64"
-	OutputPemKeysFlag  = "output-pem-keys"
-	OutputPathFlag     = "output-path"
-	OutputFileNameFlag = "output-file-name"
-	CountFlag          = "count"
-	KeyTypeFlag        = "kty"
+	OutputBase64Flag  = "output-base64"
+	OutputPemKeysFlag = "output-pem-keys"
+	OutputPathFlag    = "output-path"
+	OutputFileFlag    = "output-file"
+	CountFlag         = "count"
+	KeyTypeFlag       = "kty"
 
 	// JWK Algorithm Types
 	JwkAlgorithmRsa2048   = "RSA-2048"

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,13 +23,5 @@ func init() {
 	viper.SetEnvPrefix("GST")
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
-
-	RootCmd.PersistentFlags().StringP(LogLevelFlag, "l", "Info", "The logging level to use - 'Info', 'Debug', 'Warn', 'Error'")
-
-	if err := viper.BindPFlag(LogLevelFlag, RootCmd.PersistentFlags().Lookup(LogLevelFlag)); err != nil {
-		log.Fatal(err)
-	}
-	if err := viper.BindEnv(LogLevelFlag); err != nil {
-		log.Fatal(err)
-	}
+	viper.AutomaticEnv()
 }

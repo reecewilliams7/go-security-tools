@@ -6,22 +6,24 @@ import (
 	"crypto/rand"
 
 	"github.com/lestrrat-go/jwx/v2/jwk"
+
+	internaljwk "github.com/reecewilliams7/go-security-tools/internal/jwk"
 )
 
 // ECDSAJSONWebKeyCreator creates ECDSA-based JSON Web Keys.
-type ECDSAJSONWebKeyCreator struct {
+type ECDSAJWKCreator struct {
 	curveType string
 }
 
-// NewECDSAJSONWebKeyCreator creates a new ECDSAJSONWebKeyCreator with the specified curve type.
+// NewECDSAJWKCreator creates a new ECDSAJWKCreator with the specified curve type.
 // Supported curve types are "P256", "P384", and "P521".
-func NewECDSAJSONWebKeyCreator(curveType string) *ECDSAJSONWebKeyCreator {
-	c := ECDSAJSONWebKeyCreator{curveType: curveType}
+func NewECDSAJWKCreator(curveType string) *ECDSAJWKCreator {
+	c := ECDSAJWKCreator{curveType: curveType}
 	return &c
 }
 
 // Create generates a new ECDSA JSON Web Key.
-func (c *ECDSAJSONWebKeyCreator) Create() (*JSONWebKeyOutput, error) {
+func (c *ECDSAJWKCreator) Create() (*internaljwk.JWKOutput, error) {
 	var curve elliptic.Curve
 	switch c.curveType {
 	case "P256":
@@ -48,22 +50,7 @@ func (c *ECDSAJSONWebKeyCreator) Create() (*JSONWebKeyOutput, error) {
 		return nil, err
 	}
 
-	pemPrivateKey, err := jwk.EncodePEM(key)
-	if err != nil {
-		return nil, err
-	}
-
-	publicKey, err := jwk.PublicKeyOf(key)
-	if err != nil {
-		return nil, err
-	}
-
-	pemPublicKey, err := jwk.EncodePEM(publicKey)
-	if err != nil {
-		return nil, err
-	}
-
-	jo, err := NewJSONWebKeyOutput(key, string(pemPrivateKey), string(pemPublicKey))
+	jo, err := internaljwk.NewJWKOutput(key)
 	if err != nil {
 		return nil, err
 	}

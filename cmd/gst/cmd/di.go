@@ -2,33 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"os"
 
+	internaljwk "github.com/reecewilliams7/go-security-tools/internal/jwk"
 	"github.com/reecewilliams7/go-security-tools/pkg/clientcredentials"
 	"github.com/reecewilliams7/go-security-tools/pkg/jwk"
-
-	"github.com/hashicorp/go-hclog"
-	"github.com/spf13/viper"
 )
-
-func buildLogger(prefix string) hclog.Logger {
-	configLogLevel := viper.GetString(LogLevelFlag)
-
-	var writer io.Writer = os.Stderr
-
-	logLevel := hclog.LevelFromString(configLogLevel)
-
-	logger := hclog.New(&hclog.LoggerOptions{
-		Level:      logLevel,
-		TimeFormat: "2006/01/02 15:04:05",
-		Name:       "gst",
-		Output:     writer,
-	})
-
-	sublogger := logger.Named(prefix)
-	return sublogger
-}
 
 func buildClientCredentialsCreator(clientIDType string, clientSecretType string) (*clientcredentials.ClientCredentialsCreator, error) {
 	var clientIDCreator clientcredentials.ClientIDCreator
@@ -55,19 +34,37 @@ func buildClientCredentialsCreator(clientIDType string, clientSecretType string)
 	return ccc, nil
 }
 
-func buildJwkCreator(jwkAlgorithm string) (JSONWebKeyCreator, error) {
+func buildJWKCreator(jwkAlgorithm string) (jwk.JWKCreator, error) {
 	switch jwkAlgorithm {
 	case JwkAlgorithmRsa2048:
 		return jwk.NewRSAJSONWebKeyCreator(2048), nil
 	case JwkAlgorithmRsa4096:
 		return jwk.NewRSAJSONWebKeyCreator(4096), nil
 	case JwkAlgorithmEcdsaP256:
-		return jwk.NewECDSAJSONWebKeyCreator("P256"), nil
+		return jwk.NewECDSAJWKCreator("P256"), nil
 	case JwkAlgorithmEcdsaP384:
-		return jwk.NewECDSAJSONWebKeyCreator("P384"), nil
+		return jwk.NewECDSAJWKCreator("P384"), nil
 	case JwkAlgorithmEcdsaP521:
-		return jwk.NewECDSAJSONWebKeyCreator("P521"), nil
+		return jwk.NewECDSAJWKCreator("P521"), nil
 	default:
 		return nil, fmt.Errorf("unknown JWK algorithm: %s", jwkAlgorithm)
+	}
+}
+
+func buildJWKWriter(outputPath string, outputFile string, outputBase64 bool, outputPemKeys bool) (internaljwk.JWKOutputWriter, error) {
+	writeToFile := false
+
+	if len(outputPath) > 0 {
+		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+			return nil, err
+		}
+		fmt.Printf("Output path specified so will write JWK files to following location: %s\n", outputPath)
+		writeToFile = true
+	}
+
+	if writeToFile {
+		return internaljwk.NewFileJwkOutputWriter(outputPath, outputFile, outputBase64, outputPemKeys), nil
+	} else {
+		return internaljwk.NewFmtJWKOutputWriter(outputBase64, outputPemKeys), nil
 	}
 }

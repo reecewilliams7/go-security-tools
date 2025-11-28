@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/reecewilliams7/go-security-tools/pkg/clientCredentials"
-	jwks "github.com/reecewilliams7/go-security-tools/pkg/jsonWebKeys"
+	"github.com/reecewilliams7/go-security-tools/pkg/clientcredentials"
+	"github.com/reecewilliams7/go-security-tools/pkg/jwk"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/spf13/viper"
@@ -30,43 +30,43 @@ func buildLogger(prefix string) hclog.Logger {
 	return sublogger
 }
 
-func buildClientCredentialsCreator(clientIdType string, clientSecretType string) (*clientCredentials.ClientCredentialsCreator, error) {
-	var clientIdCreator clientCredentials.ClientIdCreator
-	var clientSecretCreator clientCredentials.ClientSecretCreator
+func buildClientCredentialsCreator(clientIDType string, clientSecretType string) (*clientcredentials.ClientCredentialsCreator, error) {
+	var clientIDCreator clientcredentials.ClientIDCreator
+	var clientSecretCreator clientcredentials.ClientSecretCreator
 
-	switch clientIdType {
+	switch clientIDType {
 	case ClientIdTypeUUIDv7:
-		clientIdCreator = clientCredentials.NewUUIDv7ClientIdCreator()
+		clientIDCreator = clientcredentials.NewUUIDv7ClientIDCreator()
 	case ClientIdTypeShort:
-		clientIdCreator = clientCredentials.NewShortUuidClientIdCreator()
+		clientIDCreator = clientcredentials.NewShortUUIDClientIDCreator()
 	default:
-		return &clientCredentials.ClientCredentialsCreator{}, fmt.Errorf("unknown client id type: %s", clientIdType)
+		return &clientcredentials.ClientCredentialsCreator{}, fmt.Errorf("unknown client id type: %s", clientIDType)
 	}
 
 	switch clientSecretType {
 	case ClientSecretTypeCryptoRand:
-		clientSecretCreator = clientCredentials.NewCryptoRandClientSecretCreator()
+		clientSecretCreator = clientcredentials.NewCryptoRandClientSecretCreator()
 	default:
-		return &clientCredentials.ClientCredentialsCreator{}, fmt.Errorf("unknown client secret type: %s", clientSecretType)
+		return &clientcredentials.ClientCredentialsCreator{}, fmt.Errorf("unknown client secret type: %s", clientSecretType)
 	}
 
-	ccc := clientCredentials.NewClientCredentialsCreator(clientIdCreator, clientSecretCreator)
+	ccc := clientcredentials.NewClientCredentialsCreator(clientIDCreator, clientSecretCreator)
 
 	return ccc, nil
 }
 
-func buildJwkCreator(jwkAlgorithm string) (JsonWebKeyCreator, error) {
+func buildJwkCreator(jwkAlgorithm string) (JSONWebKeyCreator, error) {
 	switch jwkAlgorithm {
 	case JwkAlgorithmRsa2048:
-		return jwks.NewRsaJsonWebKeyCreator(2048), nil
+		return jwk.NewRSAJSONWebKeyCreator(2048), nil
 	case JwkAlgorithmRsa4096:
-		return jwks.NewRsaJsonWebKeyCreator(4096), nil
+		return jwk.NewRSAJSONWebKeyCreator(4096), nil
 	case JwkAlgorithmEcdsaP256:
-		return jwks.NewECDSAJsonWebKeyCreator("P256"), nil
+		return jwk.NewECDSAJSONWebKeyCreator("P256"), nil
 	case JwkAlgorithmEcdsaP384:
-		return jwks.NewECDSAJsonWebKeyCreator("P384"), nil
+		return jwk.NewECDSAJSONWebKeyCreator("P384"), nil
 	case JwkAlgorithmEcdsaP521:
-		return jwks.NewECDSAJsonWebKeyCreator("P521"), nil
+		return jwk.NewECDSAJSONWebKeyCreator("P521"), nil
 	default:
 		return nil, fmt.Errorf("unknown JWK algorithm: %s", jwkAlgorithm)
 	}

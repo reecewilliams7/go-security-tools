@@ -1,14 +1,18 @@
-package clientCredentials
+package clientcredentials
 
 import (
 	"encoding/base64"
-	rand "math/rand"
+	"math/rand"
 )
 
+// CryptoRandClientSecretCreator creates client secrets using cryptographically
+// secure random number generation.
 type CryptoRandClientSecretCreator struct {
 	src rand.Source
 }
 
+// NewCryptoRandClientSecretCreator creates a new CryptoRandClientSecretCreator
+// using the default crypto/rand source.
 func NewCryptoRandClientSecretCreator() *CryptoRandClientSecretCreator {
 	cryptoSrc := &cryptoSource{}
 	return &CryptoRandClientSecretCreator{
@@ -16,12 +20,15 @@ func NewCryptoRandClientSecretCreator() *CryptoRandClientSecretCreator {
 	}
 }
 
+// NewCryptoRandClientSecretCreatorWithSource creates a new CryptoRandClientSecretCreator
+// with a custom random source.
 func NewCryptoRandClientSecretCreatorWithSource(src rand.Source) *CryptoRandClientSecretCreator {
 	return &CryptoRandClientSecretCreator{
 		src: src,
 	}
 }
 
+// Create generates a new cryptographically secure client secret.
 func (c *CryptoRandClientSecretCreator) Create() (string, error) {
 	rnd := rand.New(c.src)
 	buff := make([]byte, 32)

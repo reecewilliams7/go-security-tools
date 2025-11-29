@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -114,13 +115,10 @@ func TestFileJwkOutputWriter_Write_MultipleIterations(t *testing.T) {
 			t.Fatalf("unexpected error on iteration %d: %v", i, err)
 		}
 
-		jwkFile := filepath.Join(tempDir, "test-jwk-"+string(rune('0'+i))+".jwk")
-		// Use proper integer formatting
-		expectedFile := filepath.Join(tempDir, "test-jwk-"+itoa(i)+".jwk")
+		expectedFile := filepath.Join(tempDir, "test-jwk-"+strconv.Itoa(i)+".jwk")
 		if _, err := os.Stat(expectedFile); os.IsNotExist(err) {
 			t.Errorf("expected file %s to exist", expectedFile)
 		}
-		_ = jwkFile // Suppress unused warning
 	}
 }
 
@@ -144,17 +142,4 @@ func TestGetOutputFilePath(t *testing.T) {
 				tt.outputPath, tt.outputFile, tt.ext, tt.i, result, tt.expected)
 		}
 	}
-}
-
-// Helper function to convert int to string
-func itoa(i int) string {
-	if i == 0 {
-		return "0"
-	}
-	result := ""
-	for i > 0 {
-		result = string(rune('0'+i%10)) + result
-		i /= 10
-	}
-	return result
 }

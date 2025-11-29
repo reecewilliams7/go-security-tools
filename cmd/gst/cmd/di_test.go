@@ -19,10 +19,10 @@ func TestBuildClientCredentialsCreator_UUIDv7(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error creating credentials: %v", err)
 	}
-	if cc.ClientID == "" {
+	if cc.ClientID() == "" {
 		t.Error("expected non-empty ClientID")
 	}
-	if cc.ClientSecret == "" {
+	if cc.ClientSecret() == "" {
 		t.Error("expected non-empty ClientSecret")
 	}
 }

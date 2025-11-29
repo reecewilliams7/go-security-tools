@@ -49,9 +49,9 @@ var createClientCredentialsCmd = &cobra.Command{
 			}
 
 			fmt.Println("Client ID:")
-			fmt.Printf("%s\n", cc.ClientID)
+			fmt.Printf("%s\n", cc.ClientID())
 			fmt.Println("Client Secret:")
-			fmt.Printf("%s\n", cc.ClientSecret)
+			fmt.Printf("%s\n", cc.ClientSecret())
 			fmt.Println("**********************************************************")
 		}
 

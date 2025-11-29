@@ -1,0 +1,41 @@
+# .gitignore for Terraform Provider
+
+# Binaries
+terraform-provider-gst
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Terraform files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Example generated files
+examples/**/*.pem
+examples/**/*.json
+examples/**/private_key*
+examples/**/public_key*
+examples/**/.terraform/
+examples/**/.terraform.lock.hcl
+examples/**/*.tfstate
+examples/**/*.tfstate.backup

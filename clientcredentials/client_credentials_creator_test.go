@@ -47,11 +47,11 @@ func TestCreateClientCredentials_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if cc.ClientID != expectedID {
-		t.Errorf("expected ClientID %q, got %q", expectedID, cc.ClientID)
+	if cc.ClientID() != expectedID {
+		t.Errorf("expected ClientID %q, got %q", expectedID, cc.ClientID())
 	}
-	if cc.ClientSecret != expectedSecret {
-		t.Errorf("expected ClientSecret %q, got %q", expectedSecret, cc.ClientSecret)
+	if cc.ClientSecret() != expectedSecret {
+		t.Errorf("expected ClientSecret %q, got %q", expectedSecret, cc.ClientSecret())
 	}
 }
 

@@ -26,8 +26,5 @@ func (ccc *ClientCredentialsCreator) CreateClientCredentials() (*ClientCredentia
 		return nil, err
 	}
 
-	return &ClientCredentials{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-	}, nil
+	return NewClientCredentials(clientID, clientSecret), nil
 }

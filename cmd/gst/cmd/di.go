@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/reecewilliams7/go-security-tools/clientcredentials"
 	internaljwk "github.com/reecewilliams7/go-security-tools/internal/jwk"
-	"github.com/reecewilliams7/go-security-tools/pkg/clientcredentials"
-	"github.com/reecewilliams7/go-security-tools/pkg/jwk"
+	"github.com/reecewilliams7/go-security-tools/jwk"
 )
 
 func buildClientCredentialsCreator(clientIDType string, clientSecretType string) (*clientcredentials.ClientCredentialsCreator, error) {

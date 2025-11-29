@@ -10,7 +10,7 @@ import (
 	internaljwk "github.com/reecewilliams7/go-security-tools/internal/jwk"
 )
 
-// ECDSAJSONWebKeyCreator creates ECDSA-based JSON Web Keys.
+// ECDSAJWKCreator creates ECDSA-based JSON Web Keys.
 type ECDSAJWKCreator struct {
 	curveType string
 }

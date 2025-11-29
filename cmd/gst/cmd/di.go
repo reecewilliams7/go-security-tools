@@ -64,7 +64,6 @@ func buildJWKWriter(outputPath string, outputFile string, outputBase64 bool, out
 
 	if writeToFile {
 		return internaljwk.NewFileJwkOutputWriter(outputPath, outputFile, outputBase64, outputPemKeys), nil
-	} else {
-		return internaljwk.NewFmtJWKOutputWriter(outputBase64, outputPemKeys), nil
 	}
+	return internaljwk.NewFmtJWKOutputWriter(outputBase64, outputPemKeys), nil
 }

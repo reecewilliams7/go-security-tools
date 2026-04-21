@@ -6,7 +6,7 @@ import (
 )
 
 func TestBuildClientCredentialsCreator_UUIDv7(t *testing.T) {
-	ccc, err := buildClientCredentialsCreator(ClientIdTypeUUIDv7, ClientSecretTypeCryptoRand)
+	ccc, err := buildClientCredentialsCreator(ClientIdTypeUUIDv7, ClientSecretTypeCryptoRand, 32, SecretEncodingBase64)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -28,7 +28,17 @@ func TestBuildClientCredentialsCreator_UUIDv7(t *testing.T) {
 }
 
 func TestBuildClientCredentialsCreator_ShortUUID(t *testing.T) {
-	ccc, err := buildClientCredentialsCreator(ClientIdTypeShort, ClientSecretTypeCryptoRand)
+	ccc, err := buildClientCredentialsCreator(ClientIdTypeShort, ClientSecretTypeCryptoRand, 32, SecretEncodingBase64)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if ccc == nil {
+		t.Fatal("expected non-nil ClientCredentialsCreator")
+	}
+}
+
+func TestBuildClientCredentialsCreator_Nanoid(t *testing.T) {
+	ccc, err := buildClientCredentialsCreator(ClientIdTypeNanoid, ClientSecretTypeCryptoRand, 32, SecretEncodingBase64)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -38,14 +48,14 @@ func TestBuildClientCredentialsCreator_ShortUUID(t *testing.T) {
 }
 
 func TestBuildClientCredentialsCreator_UnknownIDType(t *testing.T) {
-	_, err := buildClientCredentialsCreator("unknown", ClientSecretTypeCryptoRand)
+	_, err := buildClientCredentialsCreator("unknown", ClientSecretTypeCryptoRand, 32, SecretEncodingBase64)
 	if err == nil {
 		t.Fatal("expected error for unknown ID type")
 	}
 }
 
 func TestBuildClientCredentialsCreator_UnknownSecretType(t *testing.T) {
-	_, err := buildClientCredentialsCreator(ClientIdTypeUUIDv7, "unknown")
+	_, err := buildClientCredentialsCreator(ClientIdTypeUUIDv7, "unknown", 32, SecretEncodingBase64)
 	if err == nil {
 		t.Fatal("expected error for unknown secret type")
 	}
@@ -76,6 +86,45 @@ func TestBuildJWKCreator_ECDSA(t *testing.T) {
 		JwkAlgorithmEcdsaP256,
 		JwkAlgorithmEcdsaP384,
 		JwkAlgorithmEcdsaP521,
+	}
+
+	for _, alg := range tests {
+		t.Run(alg, func(t *testing.T) {
+			creator, err := buildJWKCreator(alg)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if creator == nil {
+				t.Fatal("expected non-nil JWKCreator")
+			}
+		})
+	}
+}
+
+func TestBuildJWKCreator_OKP(t *testing.T) {
+	tests := []string{
+		JwkAlgorithmOkpEd25519,
+		JwkAlgorithmOkpX25519,
+	}
+
+	for _, alg := range tests {
+		t.Run(alg, func(t *testing.T) {
+			creator, err := buildJWKCreator(alg)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if creator == nil {
+				t.Fatal("expected non-nil JWKCreator")
+			}
+		})
+	}
+}
+
+func TestBuildJWKCreator_HMAC(t *testing.T) {
+	tests := []string{
+		JwkAlgorithmHs256,
+		JwkAlgorithmHs384,
+		JwkAlgorithmHs512,
 	}
 
 	for _, alg := range tests {

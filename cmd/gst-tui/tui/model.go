@@ -10,6 +10,8 @@ const (
 	screenMenu screen = iota
 	screenJWKForm
 	screenCCForm
+	screenPKCEForm
+	screenJWTForm
 	screenResult
 )
 
@@ -29,6 +31,8 @@ type Model struct {
 	menu   menuModel
 	jwk    jwkFormModel
 	cc     ccFormModel
+	pkce   pkceFormModel
+	jwt    jwtFormModel
 	result resultModel
 	width  int
 	height int
@@ -51,6 +55,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.menu.width, m.menu.height = msg.Width, msg.Height
 		m.jwk.width, m.jwk.height = msg.Width, msg.Height
 		m.cc.width, m.cc.height = msg.Width, msg.Height
+		m.pkce.width, m.pkce.height = msg.Width, msg.Height
+		m.jwt.width, m.jwt.height = msg.Width, msg.Height
 		if m.screen == screenResult {
 			m.result.viewport.Width = msg.Width
 			m.result.viewport.Height = msg.Height - 4
@@ -79,6 +85,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.cc, cmd = m.cc.update(msg)
 		return m, cmd
+	case screenPKCEForm:
+		var cmd tea.Cmd
+		m.pkce, cmd = m.pkce.update(msg)
+		return m, cmd
+	case screenJWTForm:
+		var cmd tea.Cmd
+		m.jwt, cmd = m.jwt.update(msg)
+		return m, cmd
 	case screenResult:
 		var cmd tea.Cmd
 		m.result, cmd = m.result.update(msg)
@@ -95,6 +109,10 @@ func (m Model) View() string {
 		return m.jwk.view()
 	case screenCCForm:
 		return m.cc.view()
+	case screenPKCEForm:
+		return m.pkce.view()
+	case screenJWTForm:
+		return m.jwt.view()
 	case screenResult:
 		return m.result.view()
 	}
@@ -112,6 +130,14 @@ func (m Model) handleNavigate(nav navigateMsg) (Model, tea.Cmd) {
 		m.cc = newCCFormModel()
 		m.cc.width, m.cc.height = m.width, m.height
 		return m, m.cc.init()
+	case screenPKCEForm:
+		m.pkce = newPKCEFormModel()
+		m.pkce.width, m.pkce.height = m.width, m.height
+		return m, m.pkce.init()
+	case screenJWTForm:
+		m.jwt = newJWTFormModel()
+		m.jwt.width, m.jwt.height = m.width, m.height
+		return m, m.jwt.init()
 	case screenMenu:
 		m.menu = newMenuModel()
 		m.menu.width, m.menu.height = m.width, m.height

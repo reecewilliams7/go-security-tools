@@ -26,6 +26,10 @@
                 <input type="checkbox" name="outputPemKeys" {{if .OutputPemKeys}} checked{{end}}>
                 <span>Output PEM Keys</span>
             </label>
+            <label class="checkbox-item">
+                <input type="checkbox" name="outputJWKS" {{if .OutputJWKS}} checked{{end}}>
+                <span>Output JWKS</span>
+            </label>
         </div>
         <button type="submit" class="btn">Generate JWK</button>
     </form>
@@ -51,6 +55,7 @@
             <pre id="jwk-priv-{{$i}}">{{$r.JWKString}}</pre>
         </div>
 
+        {{if $r.JWKPublicString}}
         <div class="result-section">
             <div class="result-label">
                 <span>Public Key (JWK)</span>
@@ -58,6 +63,7 @@
             </div>
             <pre id="jwk-pub-{{$i}}">{{$r.JWKPublicString}}</pre>
         </div>
+        {{end}}
 
         {{if $.OutputBase64}}
         <hr class="divider">
@@ -72,6 +78,7 @@
 
         {{if $.OutputPemKeys}}
         <hr class="divider">
+        {{if $r.PEMPrivateKey}}
         <div class="result-section">
             <div class="result-label">
                 <span>PEM Private Key</span>
@@ -86,8 +93,26 @@
             </div>
             <pre id="pem-pub-{{$i}}">{{$r.PEMPublicKey}}</pre>
         </div>
+        {{else}}
+        <p style="font-size:0.85rem;color:#6b7280;">PEM encoding not available for this key type.</p>
+        {{end}}
         {{end}}
 
+    </div>
+</div>
+{{end}}
+
+{{if $.JWKSString}}
+<div class="result-card">
+    <div class="result-header">JWKS (Public Keys)</div>
+    <div class="result-body">
+        <div class="result-section">
+            <div class="result-label">
+                <span>JSON Web Key Set</span>
+                <button class="copy-btn" onclick="copyText(this,'jwks-output')">Copy</button>
+            </div>
+            <pre id="jwks-output">{{$.JWKSString}}</pre>
+        </div>
     </div>
 </div>
 {{end}}

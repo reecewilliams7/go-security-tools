@@ -9,7 +9,7 @@ import (
 	"github.com/reecewilliams7/go-security-tools/jwk"
 )
 
-func buildClientCredentialsCreator(clientIDType string, clientSecretType string) (*clientcredentials.ClientCredentialsCreator, error) {
+func buildClientCredentialsCreator(clientIDType string, clientSecretType string, secretLength int, secretEncoding string) (*clientcredentials.ClientCredentialsCreator, error) {
 	var clientIDCreator clientcredentials.ClientIDCreator
 	var clientSecretCreator clientcredentials.ClientSecretCreator
 
@@ -18,13 +18,15 @@ func buildClientCredentialsCreator(clientIDType string, clientSecretType string)
 		clientIDCreator = clientcredentials.NewUUIDv7ClientIDCreator()
 	case ClientIdTypeShort:
 		clientIDCreator = clientcredentials.NewShortUUIDClientIDCreator()
+	case ClientIdTypeNanoid:
+		clientIDCreator = clientcredentials.NewNanoidClientIDCreator()
 	default:
 		return &clientcredentials.ClientCredentialsCreator{}, fmt.Errorf("unknown client id type: %s", clientIDType)
 	}
 
 	switch clientSecretType {
 	case ClientSecretTypeCryptoRand:
-		clientSecretCreator = clientcredentials.NewCryptoRandClientSecretCreator()
+		clientSecretCreator = clientcredentials.NewCryptoRandClientSecretCreatorWithConfig(secretLength, secretEncoding)
 	default:
 		return &clientcredentials.ClientCredentialsCreator{}, fmt.Errorf("unknown client secret type: %s", clientSecretType)
 	}
@@ -46,6 +48,16 @@ func buildJWKCreator(jwkAlgorithm string) (jwk.JWKCreator, error) {
 		return jwk.NewECDSAJWKCreator("P384"), nil
 	case JwkAlgorithmEcdsaP521:
 		return jwk.NewECDSAJWKCreator("P521"), nil
+	case JwkAlgorithmOkpEd25519:
+		return jwk.NewOKPJWKCreator("Ed25519"), nil
+	case JwkAlgorithmOkpX25519:
+		return jwk.NewOKPJWKCreator("X25519"), nil
+	case JwkAlgorithmHs256:
+		return jwk.NewHMACJWKCreator("HS256"), nil
+	case JwkAlgorithmHs384:
+		return jwk.NewHMACJWKCreator("HS384"), nil
+	case JwkAlgorithmHs512:
+		return jwk.NewHMACJWKCreator("HS512"), nil
 	default:
 		return nil, fmt.Errorf("unknown JWK algorithm: %s", jwkAlgorithm)
 	}

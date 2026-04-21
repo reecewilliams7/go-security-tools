@@ -13,26 +13,31 @@ import (
 type ccField int
 
 const (
-	ccFieldCount      ccField = iota // count text input
-	ccFieldIDType                    // client-id-type selector
-	ccFieldSecretType                // client-secret-type selector
-	ccFieldSubmit                    // generate button
-	ccNumFields                      // sentinel
+	ccFieldCount          ccField = iota // count text input
+	ccFieldIDType                        // client-id-type selector
+	ccFieldSecretType                    // client-secret-type selector
+	ccFieldSecretLength                  // secret length input
+	ccFieldSecretEncoding                // secret encoding selector
+	ccFieldSubmit                        // generate button
+	ccNumFields                          // sentinel
 )
 
 var (
-	idTypeOptions = []string{"uuidv7", "short-uuid"}
-	secretOptions = []string{"crypto-rand"}
+	idTypeOptions     = []string{"uuidv7", "short-uuid", "nanoid"}
+	secretOptions     = []string{"crypto-rand"}
+	encodingOptions   = []string{"base64", "base64url", "hex"}
 )
 
 type ccFormModel struct {
-	focused        ccField
-	countInput     textinput.Model
-	idTypeIdx      int
-	secretTypeIdx  int
-	generating     bool
-	width          int
-	height         int
+	focused           ccField
+	countInput        textinput.Model
+	idTypeIdx         int
+	secretTypeIdx     int
+	secretLengthInput textinput.Model
+	secretEncodingIdx int
+	generating        bool
+	width             int
+	height            int
 }
 
 func newCCFormModel() ccFormModel {
@@ -42,9 +47,16 @@ func newCCFormModel() ccFormModel {
 	count.Width = 5
 	count.Focus()
 
+	length := textinput.New()
+	length.Placeholder = "32"
+	length.CharLimit = 2
+	length.Width = 5
+	length.SetValue("32")
+
 	return ccFormModel{
-		focused:    ccFieldCount,
-		countInput: count,
+		focused:           ccFieldCount,
+		countInput:        count,
+		secretLengthInput: length,
 	}
 }
 
@@ -83,6 +95,10 @@ func (m ccFormModel) update(msg tea.Msg) (ccFormModel, tea.Cmd) {
 				if m.secretTypeIdx > 0 {
 					m.secretTypeIdx--
 				}
+			case ccFieldSecretEncoding:
+				if m.secretEncodingIdx > 0 {
+					m.secretEncodingIdx--
+				}
 			}
 			return m, nil
 		case "right":
@@ -95,6 +111,10 @@ func (m ccFormModel) update(msg tea.Msg) (ccFormModel, tea.Cmd) {
 				if m.secretTypeIdx < len(secretOptions)-1 {
 					m.secretTypeIdx++
 				}
+			case ccFieldSecretEncoding:
+				if m.secretEncodingIdx < len(encodingOptions)-1 {
+					m.secretEncodingIdx++
+				}
 			}
 			return m, nil
 		}
@@ -102,8 +122,11 @@ func (m ccFormModel) update(msg tea.Msg) (ccFormModel, tea.Cmd) {
 
 	// Forward remaining messages to count input when focused.
 	var cmd tea.Cmd
-	if m.focused == ccFieldCount {
+	switch m.focused {
+	case ccFieldCount:
 		m.countInput, cmd = m.countInput.Update(msg)
+	case ccFieldSecretLength:
+		m.secretLengthInput, cmd = m.secretLengthInput.Update(msg)
 	}
 	return m, cmd
 }
@@ -119,8 +142,13 @@ func (m ccFormModel) moveFocus(delta int) ccFormModel {
 
 	if m.focused == ccFieldCount {
 		m.countInput.Focus()
+		m.secretLengthInput.Blur()
+	} else if m.focused == ccFieldSecretLength {
+		m.secretLengthInput.Focus()
+		m.countInput.Blur()
 	} else {
 		m.countInput.Blur()
+		m.secretLengthInput.Blur()
 	}
 	return m
 }
@@ -128,6 +156,7 @@ func (m ccFormModel) moveFocus(delta int) ccFormModel {
 func (m ccFormModel) submitCmd() tea.Cmd {
 	idType := idTypeOptions[m.idTypeIdx]
 	secretType := secretOptions[m.secretTypeIdx]
+	secretEncoding := encodingOptions[m.secretEncodingIdx]
 	countStr := m.countInput.Value()
 	if countStr == "" {
 		countStr = "1"
@@ -139,6 +168,17 @@ func (m ccFormModel) submitCmd() tea.Cmd {
 	if count > 100 {
 		count = 100
 	}
+	secretLenStr := m.secretLengthInput.Value()
+	if secretLenStr == "" {
+		secretLenStr = "32"
+	}
+	secretLen, err := strconv.Atoi(secretLenStr)
+	if err != nil || secretLen < 16 {
+		secretLen = 16
+	}
+	if secretLen > 64 {
+		secretLen = 64
+	}
 
 	return func() tea.Msg {
 		var idCreator clientcredentials.ClientIDCreator
@@ -147,6 +187,8 @@ func (m ccFormModel) submitCmd() tea.Cmd {
 			idCreator = clientcredentials.NewUUIDv7ClientIDCreator()
 		case "short-uuid":
 			idCreator = clientcredentials.NewShortUUIDClientIDCreator()
+		case "nanoid":
+			idCreator = clientcredentials.NewNanoidClientIDCreator()
 		default:
 			return navigateMsg{to: screenResult, result: fmt.Sprintf("Unknown client ID type: %s", idType)}
 		}
@@ -154,7 +196,7 @@ func (m ccFormModel) submitCmd() tea.Cmd {
 		var secretCreator clientcredentials.ClientSecretCreator
 		switch secretType {
 		case "crypto-rand":
-			secretCreator = clientcredentials.NewCryptoRandClientSecretCreator()
+			secretCreator = clientcredentials.NewCryptoRandClientSecretCreatorWithConfig(secretLen, secretEncoding)
 		default:
 			return navigateMsg{to: screenResult, result: fmt.Sprintf("Unknown client secret type: %s", secretType)}
 		}
@@ -195,6 +237,9 @@ func (m ccFormModel) view() string {
 		m.renderSelector(idTypeOptions, m.idTypeIdx, m.focused == ccFieldIDType)))
 	sb.WriteString(m.renderField(ccFieldSecretType, "Client Secret Type",
 		m.renderSelector(secretOptions, m.secretTypeIdx, m.focused == ccFieldSecretType)))
+	sb.WriteString(m.renderField(ccFieldSecretLength, "Secret Length", m.secretLengthInput.View()))
+	sb.WriteString(m.renderField(ccFieldSecretEncoding, "Secret Encoding",
+		m.renderSelector(encodingOptions, m.secretEncodingIdx, m.focused == ccFieldSecretEncoding)))
 	sb.WriteString("\n")
 
 	if m.focused == ccFieldSubmit {

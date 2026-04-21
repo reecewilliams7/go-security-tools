@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
+	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
@@ -36,17 +37,14 @@ func NewJWKOutput(
 		return nil, err
 	}
 
-	pemPrivateKey, err := jwk.EncodePEM(key)
-	if err != nil {
-		return nil, err
+	j.Base64JWK = base64.StdEncoding.EncodeToString(jsonBuf)
+
+	// Symmetric keys (oct) have no public-key counterpart and no PEM encoding.
+	if key.KeyType() == jwa.OctetSeq {
+		return j, nil
 	}
 
 	publicKey, err := jwk.PublicKeyOf(key)
-	if err != nil {
-		return nil, err
-	}
-
-	pemPublicKey, err := jwk.EncodePEM(publicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +54,15 @@ func NewJWKOutput(
 		return nil, err
 	}
 
-	j.Base64JWK = base64.StdEncoding.EncodeToString(jsonBuf)
-	j.PEMPrivateKey = string(pemPrivateKey)
-	j.PEMPublicKey = string(pemPublicKey)
+	j.JWKPublic = publicKey
+
+	// PEM encoding is best-effort: not all OKP curve types support it.
+	if pemPriv, pemErr := jwk.EncodePEM(key); pemErr == nil {
+		j.PEMPrivateKey = string(pemPriv)
+		if pemPub, pemErr := jwk.EncodePEM(publicKey); pemErr == nil {
+			j.PEMPublicKey = string(pemPub)
+		}
+	}
 
 	return j, nil
 }

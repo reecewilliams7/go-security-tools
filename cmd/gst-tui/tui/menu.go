@@ -17,8 +17,10 @@ var menuItems = []struct {
 	label       string
 	description string
 }{
-	{"Create JWK", "Generate JSON Web Keys (RSA-2048, RSA-4096, ECDSA-P256/384/521)"},
+	{"Create JWK", "Generate JSON Web Keys (RSA, ECDSA, OKP, HMAC)"},
 	{"Create Client Credentials", "Generate OAuth 2.0 client ID and secret pair"},
+	{"Create PKCE", "Generate PKCE code verifier and challenge pairs (RFC 7636)"},
+	{"Decode JWT", "Decode and inspect a JSON Web Token"},
 	{"Quit", "Exit the application"},
 }
 
@@ -43,6 +45,10 @@ func (m menuModel) update(msg tea.Msg) (menuModel, tea.Cmd) {
 			case 1:
 				return m, navigate(screenCCForm)
 			case 2:
+				return m, navigate(screenPKCEForm)
+			case 3:
+				return m, navigate(screenJWTForm)
+			case 4:
 				return m, tea.Quit
 			}
 		case "q":

@@ -14,7 +14,8 @@ before:
     - go mod tidy
 
 builds:
-  - main: ./cmd/gst
+  - id: gst
+    main: ./cmd/gst
     env:
       - CGO_ENABLED=0
     binary: gst
@@ -30,12 +31,30 @@ builds:
     ldflags:
       - "-s -w -X github.com/reecewilliams7/go-security-tools/cmd/gst/cmd.version={{.Version}}"
 
+  - id: gst-tui
+    main: ./cmd/gst-tui
+    env:
+      - CGO_ENABLED=0
+    binary: gst-tui
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w"
+
 checksum:
   name_template: gst_{{.Version}}_checksums.txt
 
 archives:
-  - formats: ["tar.gz"]
-    # this name template makes the OS and Arch compatible with the results of `uname`.
+  - id: gst
+    ids: [gst]
+    formats: ["tar.gz"]
     name_template: >-
       gst_
       {{- title .Os }}_
@@ -43,7 +62,20 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+
+  - id: gst-tui
+    ids: [gst-tui]
+    formats: ["tar.gz"]
+    name_template: >-
+      gst-tui_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
         formats: ["zip"]

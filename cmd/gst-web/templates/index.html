@@ -1,0 +1,25 @@
+{{define "content"}}
+<h1>Go Security Tools</h1>
+<div class="card" style="margin-bottom:1.5rem;">
+    <p style="color:#4b5563;line-height:1.6;">A web UI for generating OAuth 2.0 and OpenID Connect security artifacts —
+        JSON Web Keys and client credentials — using cryptographically secure methods.</p>
+</div>
+<div class="feature-grid">
+    <a href="/jwk" class="feature-link">
+        <div class="card">
+            <div class="feature-icon">🔑</div>
+            <h2>JWK Creator</h2>
+            <p class="feature-desc">Generate JSON Web Keys for RSA and ECDSA algorithms. Supports Base64 and PEM output
+                formats.</p>
+        </div>
+    </a>
+    <a href="/client-credentials" class="feature-link">
+        <div class="card">
+            <div class="feature-icon">🔐</div>
+            <h2>Client Credentials</h2>
+            <p class="feature-desc">Generate OAuth 2.0 client ID and secret pairs using UUIDv7, ShortUUID, and
+                crypto-secure random generation.</p>
+        </div>
+    </a>
+</div>
+{{end}}

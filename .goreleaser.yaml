@@ -48,6 +48,23 @@ builds:
     ldflags:
       - "-s -w"
 
+  - id: gst-web
+    main: ./cmd/gst-web
+    env:
+      - CGO_ENABLED=0
+    binary: gst-web
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w"
+
 checksum:
   name_template: gst_{{.Version}}_checksums.txt
 
@@ -71,6 +88,20 @@ archives:
     formats: ["tar.gz"]
     name_template: >-
       gst-tui_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+
+  - id: gst-web
+    ids: [gst-web]
+    formats: ["tar.gz"]
+    name_template: >-
+      gst-web_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x64
       {{- else if eq .Arch "386" }}i386

@@ -1,0 +1,96 @@
+{{define "content"}}
+<h1>JWK Creator</h1>
+
+<div class="card">
+    <form method="POST" action="/jwk">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="keyType">Key Type</label>
+                <select id="keyType" name="keyType">
+                    {{range .KeyTypes}}
+                    <option value="{{.}}" {{if eq . $.KeyType}} selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="count">Count (1–10)</label>
+                <input type="number" id="count" name="count" min="1" max="10" value="{{.Count}}">
+            </div>
+        </div>
+        <div class="checkboxes">
+            <label class="checkbox-item">
+                <input type="checkbox" name="outputBase64" {{if .OutputBase64}} checked{{end}}>
+                <span>Output Base64</span>
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" name="outputPemKeys" {{if .OutputPemKeys}} checked{{end}}>
+                <span>Output PEM Keys</span>
+            </label>
+        </div>
+        <button type="submit" class="btn">Generate JWK</button>
+    </form>
+</div>
+
+{{if .Error}}
+<div class="alert-error">{{.Error}}</div>
+{{end}}
+
+{{if and .Submitted (not .Error)}}
+{{if .Results}}
+<p class="results-heading">{{len .Results}} key{{if gt (len .Results) 1}}s{{end}} generated</p>
+{{range $i, $r := .Results}}
+<div class="result-card">
+    <div class="result-header">JWK {{add $i 1}} &mdash; {{$r.JWK.KeyType}}</div>
+    <div class="result-body">
+
+        <div class="result-section">
+            <div class="result-label">
+                <span>Private Key (JWK)</span>
+                <button class="copy-btn" onclick="copyText(this,'jwk-priv-{{$i}}')">Copy</button>
+            </div>
+            <pre id="jwk-priv-{{$i}}">{{$r.JWKString}}</pre>
+        </div>
+
+        <div class="result-section">
+            <div class="result-label">
+                <span>Public Key (JWK)</span>
+                <button class="copy-btn" onclick="copyText(this,'jwk-pub-{{$i}}')">Copy</button>
+            </div>
+            <pre id="jwk-pub-{{$i}}">{{$r.JWKPublicString}}</pre>
+        </div>
+
+        {{if $.OutputBase64}}
+        <hr class="divider">
+        <div class="result-section">
+            <div class="result-label">
+                <span>Base64 JWK (Private Key)</span>
+                <button class="copy-btn" onclick="copyText(this,'jwk-b64-{{$i}}')">Copy</button>
+            </div>
+            <pre id="jwk-b64-{{$i}}">{{$r.Base64JWK}}</pre>
+        </div>
+        {{end}}
+
+        {{if $.OutputPemKeys}}
+        <hr class="divider">
+        <div class="result-section">
+            <div class="result-label">
+                <span>PEM Private Key</span>
+                <button class="copy-btn" onclick="copyText(this,'pem-priv-{{$i}}')">Copy</button>
+            </div>
+            <pre id="pem-priv-{{$i}}">{{$r.PEMPrivateKey}}</pre>
+        </div>
+        <div class="result-section">
+            <div class="result-label">
+                <span>PEM Public Key</span>
+                <button class="copy-btn" onclick="copyText(this,'pem-pub-{{$i}}')">Copy</button>
+            </div>
+            <pre id="pem-pub-{{$i}}">{{$r.PEMPublicKey}}</pre>
+        </div>
+        {{end}}
+
+    </div>
+</div>
+{{end}}
+{{end}}
+{{end}}
+{{end}}

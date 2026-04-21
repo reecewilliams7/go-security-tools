@@ -1,0 +1,67 @@
+{{define "content"}}
+<h1>Client Credentials</h1>
+
+<div class="card">
+    <form method="POST" action="/client-credentials">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="clientIdType">Client ID Type</label>
+                <select id="clientIdType" name="clientIdType">
+                    {{range .ClientIDTypes}}
+                    <option value="{{.}}" {{if eq . $.ClientIDType}} selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="secretType">Client Secret Type</label>
+                <select id="secretType" name="secretType">
+                    {{range .SecretTypes}}
+                    <option value="{{.}}" {{if eq . $.SecretType}} selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+        </div>
+        <div class="form-row" style="max-width:280px;">
+            <div class="form-group">
+                <label for="count">Count (1–20)</label>
+                <input type="number" id="count" name="count" min="1" max="20" value="{{.Count}}">
+            </div>
+        </div>
+        <button type="submit" class="btn">Generate Credentials</button>
+    </form>
+</div>
+
+{{if .Error}}
+<div class="alert-error">{{.Error}}</div>
+{{end}}
+
+{{if and .Submitted (not .Error)}}
+{{if .Results}}
+<p class="results-heading">{{len .Results}} credential pair{{if gt (len .Results) 1}}s{{end}} generated</p>
+{{range $i, $cc := .Results}}
+<div class="result-card">
+    <div class="result-header">Credential Pair {{add $i 1}}</div>
+    <div class="result-body">
+
+        <div class="result-section">
+            <div class="result-label">
+                <span>Client ID</span>
+                <button class="copy-btn" onclick="copyText(this,'cc-id-{{$i}}')">Copy</button>
+            </div>
+            <pre id="cc-id-{{$i}}">{{$cc.ClientID}}</pre>
+        </div>
+
+        <div class="result-section">
+            <div class="result-label">
+                <span>Client Secret</span>
+                <button class="copy-btn" onclick="copyText(this,'cc-secret-{{$i}}')">Copy</button>
+            </div>
+            <pre id="cc-secret-{{$i}}">{{$cc.ClientSecret}}</pre>
+        </div>
+
+    </div>
+</div>
+{{end}}
+{{end}}
+{{end}}
+{{end}}

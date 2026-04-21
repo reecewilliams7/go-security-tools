@@ -29,6 +29,8 @@ func newServer() *server {
 			"index": parse("templates/index.html"),
 			"jwk":   parse("templates/jwk.html"),
 			"cc":    parse("templates/cc.html"),
+			"pkce":  parse("templates/pkce.html"),
+			"jwt":   parse("templates/jwt.html"),
 		},
 	}
 }
@@ -42,6 +44,10 @@ func main() {
 	mux.HandleFunc("POST /jwk", srv.handleJWKPost)
 	mux.HandleFunc("GET /client-credentials", srv.handleCCGet)
 	mux.HandleFunc("POST /client-credentials", srv.handleCCPost)
+	mux.HandleFunc("GET /pkce", srv.handlePKCEGet)
+	mux.HandleFunc("POST /pkce", srv.handlePKCEPost)
+	mux.HandleFunc("GET /jwt", srv.handleJWTGet)
+	mux.HandleFunc("POST /jwt", srv.handleJWTPost)
 
 	addr := ":8080"
 	log.Printf("Starting GST Web UI on http://localhost%s\n", addr)

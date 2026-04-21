@@ -106,7 +106,9 @@
         }
 
         select,
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"],
+        textarea {
             padding: 0.5rem 0.65rem;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -117,7 +119,9 @@
         }
 
         select:focus,
-        input[type="number"]:focus {
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        textarea:focus {
             outline: none;
             border-color: #6366f1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
@@ -309,6 +313,8 @@
         <a href="/">Home</a>
         <a href="/jwk">JWK Creator</a>
         <a href="/client-credentials">Client Credentials</a>
+        <a href="/pkce">PKCE</a>
+        <a href="/jwt">JWT Decoder</a>
     </nav>
     <main>
         {{template "content" .}}

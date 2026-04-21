@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ const (
 	jwkFieldCount                      // count text input
 	jwkFieldBase64                     // base64 toggle
 	jwkFieldPEMKeys                    // PEM keys toggle
+	jwkFieldJWKS                       // JWKS output toggle
 	jwkFieldOutputPath                 // output-path text input
 	jwkFieldOutputFile                 // output-file text input
 	jwkFieldSubmit                     // generate button
@@ -30,6 +32,11 @@ var keyTypeOptions = []string{
 	"ECDSA-P256",
 	"ECDSA-P384",
 	"ECDSA-P521",
+	"OKP-Ed25519",
+	"OKP-X25519",
+	"HS256",
+	"HS384",
+	"HS512",
 }
 
 type jwkFormModel struct {
@@ -38,6 +45,7 @@ type jwkFormModel struct {
 	countInput textinput.Model
 	base64     bool
 	pemKeys    bool
+	jwks       bool
 	outputPath textinput.Model
 	outputFile textinput.Model
 	generating bool
@@ -112,6 +120,8 @@ func (m jwkFormModel) update(msg tea.Msg) (jwkFormModel, tea.Cmd) {
 				m.base64 = !m.base64
 			case jwkFieldPEMKeys:
 				m.pemKeys = !m.pemKeys
+			case jwkFieldJWKS:
+				m.jwks = !m.jwks
 			}
 			return m, nil
 		}
@@ -159,6 +169,7 @@ func (m jwkFormModel) submitCmd() tea.Cmd {
 	keyType := keyTypeOptions[m.keyTypeIdx]
 	base64 := m.base64
 	pemKeys := m.pemKeys
+	jwks := m.jwks
 	outputPath := strings.TrimSpace(m.outputPath.Value())
 	outputFile := strings.TrimSpace(m.outputFile.Value())
 	if outputFile == "" {
@@ -189,6 +200,16 @@ func (m jwkFormModel) submitCmd() tea.Cmd {
 			creator = jwk.NewECDSAJWKCreator("P384")
 		case "ECDSA-P521":
 			creator = jwk.NewECDSAJWKCreator("P521")
+		case "OKP-Ed25519":
+			creator = jwk.NewOKPJWKCreator("Ed25519")
+		case "OKP-X25519":
+			creator = jwk.NewOKPJWKCreator("X25519")
+		case "HS256":
+			creator = jwk.NewHMACJWKCreator("HS256")
+		case "HS384":
+			creator = jwk.NewHMACJWKCreator("HS384")
+		case "HS512":
+			creator = jwk.NewHMACJWKCreator("HS512")
 		default:
 			creator = jwk.NewRSAJSONWebKeyCreator(2048)
 		}
@@ -200,11 +221,13 @@ func (m jwkFormModel) submitCmd() tea.Cmd {
 		}
 
 		var sb strings.Builder
+		var outputs []*internaljwk.JWKOutput
 		for i := 1; i <= count; i++ {
 			o, err := creator.Create()
 			if err != nil {
 				return navigateMsg{to: screenResult, result: fmt.Sprintf("Error creating JWK: %v", err)}
 			}
+			outputs = append(outputs, o)
 
 			if writeToFile {
 				if err := writer.Write(o, i); err != nil {
@@ -226,15 +249,17 @@ func (m jwkFormModel) submitCmd() tea.Cmd {
 				sb.WriteString(sep + "\n\n")
 				sb.WriteString("Private Key:\n")
 				sb.WriteString(o.JWKString)
-				sb.WriteString("\n\nPublic Key:\n")
-				sb.WriteString(o.JWKPublicString)
+				if o.JWKPublicString != "" {
+					sb.WriteString("\n\nPublic Key:\n")
+					sb.WriteString(o.JWKPublicString)
+				}
 				sb.WriteString("\n")
 				if base64 {
 					sb.WriteString("\nBase64 Encoded Private Key:\n")
 					sb.WriteString(o.Base64JWK)
 					sb.WriteString("\n")
 				}
-				if pemKeys {
+				if pemKeys && o.PEMPrivateKey != "" {
 					sb.WriteString(fmt.Sprintf("\nPEM %s Private Key:\n", o.JWK.KeyType()))
 					sb.WriteString(o.PEMPrivateKey)
 					sb.WriteString(fmt.Sprintf("\nPEM %s Public Key:\n", o.JWK.KeyType()))
@@ -242,6 +267,22 @@ func (m jwkFormModel) submitCmd() tea.Cmd {
 				}
 			}
 		}
+
+		if jwks && !writeToFile {
+			var rawKeys []json.RawMessage
+			for _, o := range outputs {
+				if o.JWKPublicString != "" {
+					rawKeys = append(rawKeys, json.RawMessage(o.JWKPublicString))
+				} else if o.JWKString != "" {
+					rawKeys = append(rawKeys, json.RawMessage(o.JWKString))
+				}
+			}
+			jwksBytes, _ := json.MarshalIndent(map[string]any{"keys": rawKeys}, "", "  ")
+			sb.WriteString("\n" + strings.Repeat("─", 60) + "\n")
+			sb.WriteString("JWKS (Public Keys):\n")
+			sb.WriteString(string(jwksBytes) + "\n")
+		}
+
 		return navigateMsg{to: screenResult, result: sb.String()}
 	}
 }
@@ -265,6 +306,8 @@ func (m jwkFormModel) view() string {
 		m.renderToggle(m.base64, m.focused == jwkFieldBase64)))
 	sb.WriteString(m.renderField(jwkFieldPEMKeys, "Output PEM Keys",
 		m.renderToggle(m.pemKeys, m.focused == jwkFieldPEMKeys)))
+	sb.WriteString(m.renderField(jwkFieldJWKS, "Output JWKS",
+		m.renderToggle(m.jwks, m.focused == jwkFieldJWKS)))
 	sb.WriteString(m.renderField(jwkFieldOutputPath, "Output Path", m.outputPath.View()))
 	sb.WriteString(m.renderField(jwkFieldOutputFile, "Output File", m.outputFile.View()))
 	sb.WriteString("\n")

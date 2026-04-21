@@ -9,8 +9,10 @@ import (
 
 func init() {
 	createClientCredentialsCmd.Flags().IntP(CountFlag, "c", 1, "The count to create.")
-	createClientCredentialsCmd.Flags().StringP(ClientIdTypeFlag, "t", ClientIdTypeUUIDv7, "The type of Client ID to create. Options are 'uuidv7' and 'short-uuid'.")
+	createClientCredentialsCmd.Flags().StringP(ClientIdTypeFlag, "t", ClientIdTypeUUIDv7, "The type of Client ID to create. Options are 'uuidv7', 'short-uuid', and 'nanoid'.")
 	createClientCredentialsCmd.Flags().StringP(ClientSecretTypeFlag, "s", ClientSecretTypeCryptoRand, "The type of Client Secret to create. Options are 'crypto-rand'.")
+	createClientCredentialsCmd.Flags().IntP(SecretLengthFlag, "l", 32, "Number of random bytes to use for the client secret (16–64).")
+	createClientCredentialsCmd.Flags().StringP(SecretEncodingFlag, "e", SecretEncodingBase64, "Encoding for the client secret. Options are 'base64', 'base64url', and 'hex'.")
 	clientCredentialsCmd.AddCommand(createClientCredentialsCmd)
 }
 
@@ -28,14 +30,22 @@ var createClientCredentialsCmd = &cobra.Command{
 		if err := viper.BindPFlag(ClientSecretTypeFlag, cmd.Flags().Lookup(ClientSecretTypeFlag)); err != nil {
 			return err
 		}
+		if err := viper.BindPFlag(SecretLengthFlag, cmd.Flags().Lookup(SecretLengthFlag)); err != nil {
+			return err
+		}
+		if err := viper.BindPFlag(SecretEncodingFlag, cmd.Flags().Lookup(SecretEncodingFlag)); err != nil {
+			return err
+		}
 		return nil
 	},
 	RunE: func(_ *cobra.Command, _ []string) error {
 		count := viper.GetInt(CountFlag)
 		clientIDType := viper.GetString(ClientIdTypeFlag)
 		clientSecretType := viper.GetString(ClientSecretTypeFlag)
+		secretLength := viper.GetInt(SecretLengthFlag)
+		secretEncoding := viper.GetString(SecretEncodingFlag)
 
-		ccc, err := buildClientCredentialsCreator(clientIDType, clientSecretType)
+		ccc, err := buildClientCredentialsCreator(clientIDType, clientSecretType, secretLength, secretEncoding)
 		if err != nil {
 			return err
 		}
@@ -58,3 +68,4 @@ var createClientCredentialsCmd = &cobra.Command{
 		return nil
 	},
 }
+

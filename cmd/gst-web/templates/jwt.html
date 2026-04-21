@@ -1,0 +1,61 @@
+{{define "content"}}
+<h1>JWT Decoder</h1>
+
+<div class="card">
+    <form method="POST" action="/jwt">
+        <div class="form-group" style="margin-bottom:1rem;">
+            <label for="token">JWT Token</label>
+            <textarea id="token" name="token" rows="4"
+                style="width:100%;resize:vertical;font-family:monospace;font-size:0.85rem;"
+                placeholder="Paste your JWT here…">{{.Token}}</textarea>
+        </div>
+        <button type="submit" class="btn">Decode JWT</button>
+    </form>
+</div>
+
+{{if .Error}}
+<div class="alert-error">{{.Error}}</div>
+{{end}}
+
+{{if and .Submitted (not .Error)}}
+<div class="result-card">
+    <div class="result-header">Decoded Token</div>
+    <div class="result-body">
+
+        <div class="result-section">
+            <div class="result-label">
+                <span>Header</span>
+                <button class="copy-btn" onclick="copyText(this,'jwt-header')">Copy</button>
+            </div>
+            <pre id="jwt-header">{{.HeaderJSON}}</pre>
+        </div>
+
+        <hr class="divider">
+
+        <div class="result-section">
+            <div class="result-label">
+                <span>Payload</span>
+                <button class="copy-btn" onclick="copyText(this,'jwt-payload')">Copy</button>
+            </div>
+            <pre id="jwt-payload">{{.PayloadJSON}}</pre>
+        </div>
+
+        <hr class="divider">
+
+        <div class="result-section">
+            <div class="result-label"><span>Expiry Status</span></div>
+            {{if .NoExpiry}}
+            <p style="font-size:0.9rem;color:#6b7280;">No expiry claim (<code>exp</code>) present.</p>
+            {{else if .IsExpired}}
+            <p style="font-size:0.9rem;color:#b91c1c;font-weight:600;">&#x26A0; Token is EXPIRED (exp: {{.ExpiresAt}})
+            </p>
+            {{else}}
+            <p style="font-size:0.9rem;color:#065f46;font-weight:600;">&#x2713; Token is valid &mdash; expires at
+                {{.ExpiresAt}}</p>
+            {{end}}
+        </div>
+
+    </div>
+</div>
+{{end}}
+{{end}}

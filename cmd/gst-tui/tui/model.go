@@ -59,7 +59,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.jwt.width, m.jwt.height = msg.Width, msg.Height
 		if m.screen == screenResult {
 			m.result.viewport.Width = msg.Width
-			m.result.viewport.Height = msg.Height - 4
+			m.result.viewport.Height = msg.Height - 5
+			m.result.viewport.SetContent(wrapContent(m.result.content, msg.Width))
 		}
 		return m, nil
 
